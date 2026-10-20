@@ -190,6 +190,9 @@ export default function InspirationRadar() {
                   <img
                     src={video.videoThumbnail}
                     alt={video.hookText}
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = '/radar/tapioca-brown-sugar.jpg';
+                    }}
                     className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-300"
                   />
 
@@ -203,6 +206,9 @@ export default function InspirationRadar() {
                       <img
                         src={video.competitorAvatar}
                         alt={video.competitorHandle}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/radar/avatar-1.jpg';
+                        }}
                         className="w-3.5 h-3.5 rounded-full object-cover"
                       />
                       <span className="text-[11px] font-medium text-white truncate max-w-[120px]">
@@ -274,7 +280,7 @@ export default function InspirationRadar() {
                   rel="noopener noreferrer"
                   className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black font-semibold text-xs transition-all hover:opacity-90 active:scale-[0.98]"
                 >
-                  <span>Consulter sur {video.platform === 'instagram' ? 'Instagram' : 'TikTok'}</span>
+                  <span>Voir le post direct sur {video.platform === 'instagram' ? 'Instagram' : 'TikTok'}</span>
                   <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
 
@@ -372,10 +378,9 @@ export default function InspirationRadar() {
                 href={selectedVideoForAnalysis.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3.5 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5"
               >
-                <span>Ouvrir sur Instagram</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <span>Ouvrir la publication originale sur Instagram ↗</span>
               </a>
 
               <button
