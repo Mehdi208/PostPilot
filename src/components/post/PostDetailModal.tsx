@@ -549,32 +549,7 @@ export default function PostDetailModal() {
 
                   {/* Creative Media Preview */}
                   <div className="aspect-square bg-zinc-900 flex items-center justify-center text-center p-4">
-                    {/* Upload Progress Indicator */}
-                  {uploadProgress !== null && (
-                    <div className="mb-2 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 space-y-1.5 animate-in fade-in">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="flex items-center gap-1.5 text-amber-400 font-medium">
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Téléversement vers le Cloud...</span>
-                        </span>
-                        <span className="font-mono text-zinc-300 font-bold">{uploadProgress}%</span>
-                      </div>
-                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-amber-500 rounded-full transition-all duration-150"
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {uploadError && (
-                    <div className="mb-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px]">
-                      {uploadError}
-                    </div>
-                  )}
-
-                  {formData.mediaUrls.length > 0 ? (
+                    {formData.mediaUrls.length > 0 ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={formData.mediaUrls[0]} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
