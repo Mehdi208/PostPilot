@@ -1,0 +1,166 @@
+{
+  "name": "PostPilot -> Meta & LinkedIn Multi-Publisher",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": {
+          "x": 0,
+          "y": 0,
+          "name": "1. Écouteur Webhook PostPilot"
+        },
+        "restore": {},
+        "expect": [
+          { "name": "event", "type": "text", "label": "Event" },
+          { "name": "workspace", "type": "text", "label": "Workspace ID" },
+          { "name": "postId", "type": "text", "label": "Post ID" },
+          { "name": "scheduledDate", "type": "text", "label": "Date de Publication" },
+          { "name": "platforms", "type": "array", "label": "Plateformes Cibles" },
+          { "name": "format", "type": "text", "label": "Format" },
+          { "name": "theme", "type": "text", "label": "Thème" },
+          { "name": "caption", "type": "text", "label": "Légende Complète" },
+          { "name": "featuredProduct", "type": "text", "label": "Produit Vedette" },
+          { "name": "cta", "type": "text", "label": "Call To Action" },
+          { "name": "mediaUrls", "type": "array", "label": "URLs des Visuels Canva/Photos" }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "router:Router",
+      "version": 1,
+      "routes": [
+        {
+          "flow": [
+            {
+              "id": 3,
+              "module": "facebook-pages:createAPost",
+              "version": 1,
+              "filter": {
+                "name": "Si Facebook sélectionné",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.platforms}}",
+                      "b": "facebook",
+                      "o": "contain:string"
+                    }
+                  ]
+                ]
+              },
+              "parameters": {},
+              "mapper": {
+                "message": "{{1.caption}}\n\n{{1.cta}}",
+                "link": "{{1.mediaUrls[1]}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 300,
+                  "y": -120,
+                  "name": "2A. Publication Page Facebook (FruiThé)"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 4,
+              "module": "instagram-business:createAPhotoPost",
+              "version": 1,
+              "filter": {
+                "name": "Si Instagram sélectionné",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.platforms}}",
+                      "b": "instagram",
+                      "o": "contain:string"
+                    }
+                  ]
+                ]
+              },
+              "parameters": {},
+              "mapper": {
+                "caption": "{{1.caption}}\n\n📍 Riviera Bonoumin (Face Abidjan Mall)\n📲 {{1.cta}}",
+                "photoUrl": "{{1.mediaUrls[1]}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 300,
+                  "y": 0,
+                  "name": "2B. Publication Instagram Business"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "flow": [
+            {
+              "id": 5,
+              "module": "linkedin:createAPost",
+              "version": 1,
+              "filter": {
+                "name": "Si LinkedIn sélectionné",
+                "conditions": [
+                  [
+                    {
+                      "a": "{{1.platforms}}",
+                      "b": "linkedin",
+                      "o": "contain:string"
+                    }
+                  ]
+                ]
+              },
+              "parameters": {},
+              "mapper": {
+                "commentary": "{{1.caption}}"
+              },
+              "metadata": {
+                "designer": {
+                  "x": 300,
+                  "y": 120,
+                  "name": "2C. Publication LinkedIn (Méhdi Traoré)"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "metadata": {
+        "designer": {
+          "x": 150,
+          "y": 0,
+          "name": "Routeur Multi-Comptes"
+        }
+      }
+    },
+    {
+      "id": 6,
+      "module": "gateway:WebhookResponse",
+      "version": 1,
+      "parameters": {
+        "status": 200
+      },
+      "mapper": {
+        "body": "{\"status\":\"success\",\"message\":\"Publication multi-réseaux réussie via Make.com\",\"postId\":\"{{1.postId}}\"}"
+      },
+      "metadata": {
+        "designer": {
+          "x": 550,
+          "y": 0,
+          "name": "3. Confirmation de Diffusion"
+        }
+      }
+    }
+  ]
+}

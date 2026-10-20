@@ -15,7 +15,12 @@ import {
   Smartphone, 
   Radio, 
   Sparkles,
-  Loader2
+  Loader2,
+  Wand2,
+  Lightbulb,
+  Zap,
+  Hash,
+  ArrowDown
 } from 'lucide-react';
 
 export default function PostDetailModal() {
@@ -34,14 +39,51 @@ export default function PostDetailModal() {
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  // Copilote IA State
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [aiActionType, setAiActionType] = useState<string>('');
+
   useEffect(() => {
     if (selectedPost) {
       setFormData({ ...selectedPost });
       setWebhookMsg(null);
+      setAiSuggestion(null);
     }
   }, [selectedPost]);
 
   if (!selectedPost || !formData) return null;
+
+  const handleAIGenerate = async (action: 'generate_hooks' | 'improve_caption' | 'shorten' | 'add_hashtags' | 'linkedin_5p') => {
+    setIsGeneratingAI(true);
+    setAiActionType(action);
+    setAiSuggestion(null);
+
+    try {
+      const res = await fetch('/api/ai/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action,
+          workspaceId: formData.workspaceId,
+          theme: formData.theme,
+          caption: formData.caption,
+          featuredProduct: formData.featuredProduct,
+          cta: formData.cta,
+          format: formData.format,
+          platforms: formData.platforms,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.result) {
+        setAiSuggestion(data.result);
+      }
+    } catch {
+      //
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   const handleSave = () => {
     updatePost(formData);
@@ -178,7 +220,7 @@ export default function PostDetailModal() {
                 </div>
 
                 <div>
-                  <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center justify-between mb-1.5">
                     <label className="text-xs font-semibold text-zinc-300">
                       Contenu détaillé (Légende du post)
                     </label>
@@ -186,6 +228,137 @@ export default function PostDetailModal() {
                       {formData.caption.length} caractères
                     </span>
                   </div>
+
+                  {/* AI Copilot Prompt Bar */}
+                  <div className="mb-2 p-2 rounded-lg bg-zinc-900 border border-zinc-800 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-[11px] font-semibold text-purple-400">
+                        <Wand2 className="w-3.5 h-3.5" />
+                        <span>Copilote IA Contextualisé</span>
+                        <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 font-mono">
+                          {formData.workspaceId === 'fruithe' ? 'Mode FruiThé 225' : 'Méthode 5P'}
+                        </span>
+                      </span>
+
+                      {isGeneratingAI && (
+                        <span className="flex items-center gap-1 text-[10px] text-amber-400">
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          <span>Génération...</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => handleAIGenerate('generate_hooks')}
+                        disabled={isGeneratingAI}
+                        className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-medium transition-all flex items-center gap-1"
+                      >
+                        <Lightbulb className="w-3 h-3 text-amber-400" />
+                        <span>3 Hooks Viraux</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAIGenerate('improve_caption')}
+                        disabled={isGeneratingAI}
+                        className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-medium transition-all flex items-center gap-1"
+                      >
+                        <Sparkles className="w-3 h-3 text-purple-400" />
+                        <span>Sublimer le texte</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAIGenerate('shorten')}
+                        disabled={isGeneratingAI}
+                        className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-medium transition-all flex items-center gap-1"
+                      >
+                        <Zap className="w-3 h-3 text-cyan-400" />
+                        <span>Raccourcir (TikTok/Reel)</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleAIGenerate('add_hashtags')}
+                        disabled={isGeneratingAI}
+                        className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-medium transition-all flex items-center gap-1"
+                      >
+                        <Hash className="w-3 h-3 text-emerald-400" />
+                        <span>Hashtags ciblés</span>
+                      </button>
+
+                      {formData.workspaceId === 'mehdi-traore' && (
+                        <button
+                          type="button"
+                          onClick={() => handleAIGenerate('linkedin_5p')}
+                          disabled={isGeneratingAI}
+                          className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-[10px] font-medium transition-all flex items-center gap-1"
+                        >
+                          <span>💼 Méthode 5P</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* AI Suggestion Box */}
+                  {aiSuggestion && (
+                    <div className="mb-2 p-3 rounded-lg bg-purple-950/20 border border-purple-500/30 text-xs space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-purple-300 text-[11px] flex items-center gap-1">
+                          <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                          <span>Suggestion IA ({aiActionType}) :</span>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setAiSuggestion(null)}
+                          className="text-zinc-500 hover:text-zinc-300 p-0.5"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="p-2.5 rounded bg-zinc-950/80 border border-zinc-800 text-zinc-200 text-[11px] whitespace-pre-line leading-relaxed max-h-48 overflow-y-auto">
+                        {aiSuggestion}
+                      </div>
+
+                      <div className="flex items-center gap-1.5 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, caption: aiSuggestion });
+                            setAiSuggestion(null);
+                          }}
+                          className="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-semibold text-[10px] transition-all"
+                        >
+                          Remplacer la légende
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, caption: `${aiSuggestion}\n\n${formData.caption}` });
+                            setAiSuggestion(null);
+                          }}
+                          className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] transition-all flex items-center gap-1"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                          <span>Insérer en haut</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, caption: `${formData.caption}\n\n${aiSuggestion}` });
+                            setAiSuggestion(null);
+                          }}
+                          className="px-2 py-1 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-[10px] transition-all"
+                        >
+                          Ajouter en bas
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   <textarea
                     rows={7}
                     value={formData.caption}
