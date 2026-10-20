@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEY_POSTS = 'postpilot_posts_v1';
-const STORAGE_KEY_THEME = 'postpilot_theme_mode';
+const STORAGE_KEY_THEME = 'postpilot_theme';
 
 export default function ClientPreviewPage() {
   const params = useParams();
@@ -38,12 +38,14 @@ export default function ClientPreviewPage() {
     if (typeof window !== 'undefined') {
       // Load Theme
       const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as 'light' | 'dark' | null;
-      const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      const initialTheme = savedTheme === 'light' ? 'light' : 'dark';
       setTheme(initialTheme);
       if (initialTheme === 'dark') {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
       }
 
       // Load Posts
@@ -70,8 +72,10 @@ export default function ClientPreviewPage() {
       localStorage.setItem(STORAGE_KEY_THEME, next);
       if (next === 'dark') {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
       } else {
         document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
       }
     }
   };

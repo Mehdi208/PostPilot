@@ -54,15 +54,14 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('postpilot_theme') as 'dark' | 'light' | null;
-      if (savedTheme) {
-        setTheme(savedTheme);
-        if (savedTheme === 'light') {
-          document.documentElement.classList.remove('dark');
-        } else {
-          document.documentElement.classList.add('dark');
-        }
+      if (savedTheme === 'light') {
+        setTheme('light');
+        document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
       } else {
+        setTheme('dark');
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
       }
     }
   }, []);
@@ -74,8 +73,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('postpilot_theme', next);
       if (next === 'light') {
         document.documentElement.classList.remove('dark');
+        document.documentElement.style.colorScheme = 'light';
       } else {
         document.documentElement.classList.add('dark');
+        document.documentElement.style.colorScheme = 'dark';
       }
     }
   };
