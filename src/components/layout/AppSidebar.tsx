@@ -264,6 +264,13 @@ export default function AppSidebar() {
         <ChevronRight className="w-4 h-4 text-zinc-600" />
       </div>
 
+      {/* Legal Footer Links (ARTCI & Loi 2013-450) */}
+      <div className="px-3 pb-2 text-[10px] text-zinc-600 flex items-center justify-between">
+        <a href="/mentions-legales" className="hover:text-zinc-400 transition-colors">Mentions Légales</a>
+        <span>•</span>
+        <a href="/confidentialite" className="hover:text-zinc-400 transition-colors">Confidentialité (ARTCI)</a>
+      </div>
+
       {/* Workspace Settings Modal */}
       <WorkspaceSettingsModal
         isOpen={isSettingsOpen}

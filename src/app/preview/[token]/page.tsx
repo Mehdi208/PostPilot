@@ -518,8 +518,13 @@ export default function ClientPreviewPage() {
       )}
 
       {/* Footer */}
-      <footer className="p-4 border-t border-zinc-800 text-center text-xs text-zinc-400">
-        PostPilot • Développé par Méhdi Traoré pour FruiThé Abidjan • {new Date().getFullYear()}
+      <footer className="p-4 border-t border-zinc-800 text-center text-xs text-zinc-400 space-y-1">
+        <div>PostPilot • Développé par Méhdi Traoré pour FruiThé Abidjan • {new Date().getFullYear()}</div>
+        <div className="text-[11px] text-zinc-500 space-x-3">
+          <a href="/mentions-legales" target="_blank" className="hover:text-zinc-300">Mentions Légales</a>
+          <span>•</span>
+          <a href="/confidentialite" target="_blank" className="hover:text-zinc-300">Protection des Données (ARTCI)</a>
+        </div>
       </footer>
     </div>
   );
