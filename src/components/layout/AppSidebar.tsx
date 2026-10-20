@@ -13,8 +13,10 @@ import {
   Briefcase, 
   Radio, 
   Lock,
-  ChevronRight
+  ChevronRight,
+  Settings
 } from 'lucide-react';
+import WorkspaceSettingsModal from '@/components/settings/WorkspaceSettingsModal';
 
 export default function AppSidebar() {
   const { 
@@ -27,6 +29,7 @@ export default function AppSidebar() {
   } = usePostPilot();
 
   const [copied, setCopied] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Compteurs pour le badge du workspace actif
   const currentWorkspacePosts = posts.filter(p => p.workspaceId === activeWorkspace.id);
@@ -233,6 +236,20 @@ export default function AppSidebar() {
         </div>
       </div>
 
+      {/* Settings & Automation Button */}
+      <div className="px-3 py-2 border-t border-zinc-800/60">
+        <button
+          onClick={() => setIsSettingsOpen(true)}
+          className="w-full flex items-center justify-between p-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900 transition-all"
+        >
+          <div className="flex items-center gap-2">
+            <Settings className="w-4 h-4 text-amber-400" />
+            <span>Paramètres & Webhooks</span>
+          </div>
+          <span className="text-[10px] text-zinc-500 font-mono">Make</span>
+        </button>
+      </div>
+
       {/* User Footer */}
       <div className="p-3 border-t border-zinc-800/60 flex items-center justify-between text-xs text-zinc-400">
         <div className="flex items-center gap-2">
@@ -246,6 +263,12 @@ export default function AppSidebar() {
         </div>
         <ChevronRight className="w-4 h-4 text-zinc-600" />
       </div>
+
+      {/* Workspace Settings Modal */}
+      <WorkspaceSettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
     </aside>
   );
 }

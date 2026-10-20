@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { usePostPilot } from '@/context/PostPilotContext';
 import { Post, PostStatus } from '@/types/post';
 import { getStatusBadge } from '@/lib/utils';
+import { uploadPostMedia } from '@/lib/firebase/storage';
 import { 
   X, 
   Upload, 
@@ -12,8 +13,9 @@ import {
   CheckCircle2, 
   MessageSquare, 
   Smartphone, 
-  Radio,
-  Sparkles
+  Radio, 
+  Sparkles,
+  Loader2
 } from 'lucide-react';
 
 export default function PostDetailModal() {
@@ -29,6 +31,8 @@ export default function PostDetailModal() {
   const [activeTab, setActiveTab] = useState<'details' | 'preview'>('details');
   const [isSendingWebhook, setIsSendingWebhook] = useState(false);
   const [webhookMsg, setWebhookMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (selectedPost) {
@@ -44,20 +48,34 @@ export default function PostDetailModal() {
     setSelectedPost(null);
   };
 
-  const handleMediaUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const newUrls: string[] = [...formData.mediaUrls];
-    Array.from(files).forEach((file) => {
-      const url = URL.createObjectURL(file);
-      newUrls.push(url);
-    });
+    setUploadError(null);
+    setUploadProgress(10);
 
-    setFormData({
-      ...formData,
-      mediaUrls: newUrls,
-    });
+    try {
+      const newUrls: string[] = [...formData.mediaUrls];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const uploadedUrl = await uploadPostMedia(
+          formData.workspaceId,
+          formData.id,
+          file,
+          (percent) => setUploadProgress(percent)
+        );
+        newUrls.push(uploadedUrl);
+      }
+
+      setFormData((prev) => (prev ? { ...prev, mediaUrls: newUrls } : prev));
+      setUploadProgress(null);
+    } catch (err: unknown) {
+      setUploadProgress(null);
+      const msg = err instanceof Error ? err.message : 'Erreur de téléversement';
+      setUploadError(msg);
+    }
   };
 
   const handleRemoveMedia = (indexToRemove: number) => {
@@ -228,6 +246,31 @@ export default function PostDetailModal() {
                     Visuel Créatif (Canva / Photoshop / Photos réelles)
                   </label>
                   
+                  {/* Upload Progress Indicator */}
+                  {uploadProgress !== null && (
+                    <div className="mb-2 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 space-y-1.5 animate-in fade-in">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="flex items-center gap-1.5 text-amber-400 font-medium">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Téléversement vers le Cloud...</span>
+                        </span>
+                        <span className="font-mono text-zinc-300 font-bold">{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-amber-500 rounded-full transition-all duration-150"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="mb-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px]">
+                      {uploadError}
+                    </div>
+                  )}
+
                   {formData.mediaUrls.length > 0 ? (
                     <div className="space-y-2">
                       <div className="grid grid-cols-2 gap-2">
@@ -333,7 +376,32 @@ export default function PostDetailModal() {
 
                   {/* Creative Media Preview */}
                   <div className="aspect-square bg-zinc-900 flex items-center justify-center text-center p-4">
-                    {formData.mediaUrls.length > 0 ? (
+                    {/* Upload Progress Indicator */}
+                  {uploadProgress !== null && (
+                    <div className="mb-2 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 space-y-1.5 animate-in fade-in">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="flex items-center gap-1.5 text-amber-400 font-medium">
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Téléversement vers le Cloud...</span>
+                        </span>
+                        <span className="font-mono text-zinc-300 font-bold">{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full h-1.5 bg-zinc-800 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-amber-500 rounded-full transition-all duration-150"
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {uploadError && (
+                    <div className="mb-2 p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px]">
+                      {uploadError}
+                    </div>
+                  )}
+
+                  {formData.mediaUrls.length > 0 ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={formData.mediaUrls[0]} alt="Preview" className="w-full h-full object-cover" />
                     ) : (

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Post, PostStatus, Platform } from '@/types/post';
 import { Workspace, DEFAULT_WORKSPACES } from '@/types/workspace';
 import initialPostsData from '@/lib/data/initial-posts.json';
+import { syncPostToFirestore, subscribeToWorkspacePosts } from '@/lib/firebase/firestore';
 
 interface PostPilotContextType {
   workspaces: Workspace[];
@@ -79,7 +80,21 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  // Sauvegarde automatique des posts dans le localStorage
+  // Écouteur temps réel Firestore (si clés réelles configurées)
+  useEffect(() => {
+    const unsubscribe = subscribeToWorkspacePosts(activeWorkspace.id, (firestorePosts) => {
+      if (firestorePosts && firestorePosts.length > 0) {
+        setPosts(firestorePosts);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(firestorePosts));
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [activeWorkspace.id]);
+
+  // Sauvegarde automatique des posts dans le localStorage et sync Firestore
   const savePosts = (newPosts: Post[]) => {
     setPosts(newPosts);
     if (typeof window !== 'undefined') {
@@ -95,17 +110,25 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updatePostStatus = (postId: string, status: PostStatus) => {
+    let targetPost: Post | null = null;
     const updated = posts.map(p => {
       if (p.id === postId) {
-        return {
+        const updatedItem = {
           ...p,
           status,
           updatedAt: new Date().toISOString(),
         };
+        targetPost = updatedItem;
+        return updatedItem;
       }
       return p;
     });
+
     savePosts(updated);
+
+    if (targetPost) {
+      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+    }
 
     if (selectedPost && selectedPost.id === postId) {
       setSelectedPost({
@@ -119,13 +142,13 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   const updatePost = (updatedPost: Post) => {
     const updated = posts.map(p => (p.id === updatedPost.id ? updatedPost : p));
     savePosts(updated);
+    syncPostToFirestore(activeWorkspace.id, updatedPost).catch(() => {});
     if (selectedPost && selectedPost.id === updatedPost.id) {
       setSelectedPost(updatedPost);
     }
   };
 
   const importPosts = (newPosts: Post[]) => {
-    // Évite les doublons basés sur l'ID
     const existingIds = new Set(posts.map(p => p.id));
     const merged = [...posts];
     for (const np of newPosts) {
@@ -140,9 +163,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addPostFeedback = (postId: string, comment: string, approved: boolean) => {
+    let targetPost: Post | null = null;
     const updated = posts.map(p => {
       if (p.id === postId) {
-        return {
+        const item = {
           ...p,
           status: (approved ? 'approved' : 'changes_requested') as PostStatus,
           clientFeedback: {
@@ -152,10 +176,16 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
           },
           updatedAt: new Date().toISOString(),
         };
+        targetPost = item;
+        return item;
       }
       return p;
     });
+
     savePosts(updated);
+    if (targetPost) {
+      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+    }
   };
 
   const dispatchToMakeWebhook = async (post: Post): Promise<{ success: boolean; message: string }> => {

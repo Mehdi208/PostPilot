@@ -12,6 +12,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:123456789:web:abcdef",
 };
 
+export const isFirebaseConfigured = (): boolean => {
+  const key = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
+  return Boolean(key && key !== "mock-api-key" && key.length > 10);
+};
+
 // Singleton Firebase App
 export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const db = getFirestore(app);
