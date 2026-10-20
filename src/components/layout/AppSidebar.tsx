@@ -220,9 +220,12 @@ export default function AppSidebar() {
 
       </div>
 
-      {/* Footer with Theme Toggle */}
+      {/* Footer with Theme Toggle & PWA badge */}
       <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-black flex items-center justify-between text-xs text-zinc-400">
-        <span className="text-[10px] font-mono">v2.0 • Monochrome</span>
+        <span className="text-[10px] font-mono flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+          <span>PostPilot PWA</span>
+        </span>
         <button
           onClick={toggleTheme}
           className="flex items-center gap-1.5 text-[11px] text-zinc-600 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white transition-colors font-medium"

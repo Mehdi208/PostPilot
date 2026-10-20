@@ -76,3 +76,20 @@ body {
 button:active:not(:disabled), a:active:not(:disabled) {
   transform: scale(0.98);
 }
+
+/* PWA Standalone Mode & Safe Area Support */
+@supports (padding-top: env(safe-area-inset-top)) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* Mobile standalone PWA app polish */
+@media (display-mode: standalone) {
+  body {
+    -webkit-touch-callout: none;
+  }
+}

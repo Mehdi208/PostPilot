@@ -1,0 +1,71 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    name: 'PostPilot — OS Community Management',
+    short_name: 'PostPilot',
+    description: "Système d'exploitation éditorial et régie de Community Management pour FruiThé Abidjan et créateurs de contenu.",
+    start_url: '/',
+    display: 'standalone',
+    background_color: '#000000',
+    theme_color: '#000000',
+    orientation: 'portrait-primary',
+    scope: '/',
+    id: '/',
+    categories: ['productivity', 'business', 'social'],
+    icons: [
+      {
+        src: '/icons/icon-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-maskable-192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/icons/icon-maskable-512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+      {
+        src: '/icons/icon.svg',
+        sizes: 'any',
+        type: 'image/svg+xml',
+      },
+    ],
+    shortcuts: [
+      {
+        name: 'Calendrier Éditorial',
+        short_name: 'Calendrier',
+        description: 'Consulter le calendrier des publications',
+        url: '/?view=calendar',
+        icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+      },
+      {
+        name: 'Radar Concurrentiel',
+        short_name: 'Radar',
+        description: 'Veille et vidéos virales de la niche',
+        url: '/?view=inspiration',
+        icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+      },
+      {
+        name: 'Tableur 12 Colonnes',
+        short_name: 'Tableur',
+        description: 'Vue tableur haute densité Excel',
+        url: '/?view=table',
+        icons: [{ src: '/icons/icon-192.png', sizes: '192x192' }],
+      },
+    ],
+  };
+}
