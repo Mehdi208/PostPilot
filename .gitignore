@@ -40,9 +40,11 @@ serviceAccountKey.json
 
 # vercel
 .vercel
+*.xlsx
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
 
 .vercel
+*.xlsx
