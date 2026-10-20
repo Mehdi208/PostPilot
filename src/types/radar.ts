@@ -1,41 +1,48 @@
+export type RadarCategory = 
+  | 'demonstration' 
+  | 'situation' 
+  | 'avis' 
+  | 'coulisses';
+
 export interface ViralOutlierVideo {
   id: string;
   workspaceId: string;
   competitorName: string;
   competitorHandle: string;
   competitorAvatar: string;
-  niche: 'bubble_tea' | 'food_resto' | 'personal_branding' | 'agency_cm';
+  category: RadarCategory;
+  categoryLabel: string;
   platform: 'instagram' | 'tiktok';
   
-  // URL vers la vraie vidéo Instagram ou TikTok
+  // URL de redirection directe vers la vidéo réelle
   videoUrl: string;
   
-  // Visuel du mockup vidéo (affiche / poster haute qualité)
+  // Visuel et durée
   videoThumbnail: string;
-  duration: string; // Ex: "0:24", "0:38"
+  duration: string;
   
-  // Statistiques réelles observées
-  viewsCount: number;          // Ex: 245000
-  viewsFormatted: string;      // Ex: "245K"
-  accountMedianViews: number;  // Ex: 32000 (médiane normale du compte)
-  outlierMultiplier: number;   // Ex: 7.6 (views / median)
-  timeAgo: string;             // Ex: "Il y a 18h", "Il y a 36h", "Hier à 14h"
-  crawledAt: string;           // ISO date
+  // Métriques d'audience
+  viewsCount: number;
+  viewsFormatted: string;
+  accountMedianViews: number;
+  outlierMultiplier: number;
+  timeAgo: string;
+  crawledAt: string;
   
-  // Analyse décortiquée par le radar (Reverse-Engineering)
-  hookText: string;            // Le hook visuel ou parlé verbatim
-  whyItPerformed: string;      // Pourquoi l'algorithme et les gens ont réagi
-  secretFormula: string;       // Formule psychologique (ex: "Contraste + Curiosité + Food-porn")
-  audioTrendingTitle?: string; // Nom de l'audio tendance
+  // Analyse de performance
+  hookText: string;
+  whyItPerformed: string;
+  structureNote: string;
+  audioTrack?: string;
   
-  // Action tactique recommandée
-  angleToAdapt: string;        // Comment Méhdi peut l'adapter directement pour FruiThé ou son profil
-  suggestedProduct?: string;   // Ex: "Brown Sugar Boba", "Burger BBL Combo"
+  // Déclinaison éditoriale recommandée
+  adaptationStrategy: string;
+  suggestedProduct?: string;
 }
 
 export interface RadarFilterState {
-  timeframe: '24h' | '48h' | '7d' | 'all';
-  category: 'all' | 'food_boba' | 'asmr' | 'humour_nouchi' | 'debat' | 'b2b';
+  timeframe: 'all' | '24h' | '48h' | '7d';
+  category: 'all' | RadarCategory;
   platform: 'all' | 'instagram' | 'tiktok';
-  minMultiplier: number; // Ex: 3 for 3x
+  minMultiplier: 'all' | '5x' | '8x';
 }

@@ -13,7 +13,7 @@ function DashboardContent() {
   const { activeView } = usePostPilot();
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-zinc-950 font-sans text-zinc-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-white dark:bg-black font-sans text-zinc-900 dark:text-zinc-100">
       {/* Sidebar Nav */}
       <AppSidebar />
 

@@ -6,13 +6,9 @@ import {
   FileSpreadsheet, 
   Download, 
   Search, 
-  CalendarDays,
   Plus,
-  Flame,
-  Table2,
-  Calendar,
-  CheckCircle2,
-  AlertCircle
+  Sun,
+  Moon
 } from 'lucide-react';
 import ExcelImportModal from '@/components/excel/ExcelImportModal';
 import * as XLSX from 'xlsx';
@@ -31,14 +27,15 @@ export default function AppTopbar() {
     setSelectedStatus,
     searchQuery, 
     setSearchQuery,
-    setSelectedPost 
+    setSelectedPost,
+    theme,
+    toggleTheme
   } = usePostPilot();
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const currentWorkspacePosts = posts.filter(p => p.workspaceId === activeWorkspace.id);
   const approvedCount = currentWorkspacePosts.filter(p => p.status === 'approved').length;
-  const pendingCount = currentWorkspacePosts.filter(p => p.status === 'pending_review').length;
   const changesCount = currentWorkspacePosts.filter(p => p.status === 'changes_requested').length;
   const totalCount = currentWorkspacePosts.length;
   const approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
@@ -75,14 +72,14 @@ export default function AppTopbar() {
       dayOfWeek: 'Jeu.',
       time: '11:30',
       platforms: ['instagram', 'tiktok'] as ('instagram' | 'tiktok')[],
-      objective: 'Notoriété & Sensibilisation',
+      objective: 'Notoriété',
       format: 'video' as const,
-      theme: 'Nouvelle publication virale',
-      caption: 'Écrivez votre hook et votre légende ici...',
+      theme: 'Nouvelle publication',
+      caption: 'Légende à rédiger...',
       featuredProduct: 'Bubble Tea Signature',
       cta: 'Commander au 05 96 93 50 50',
       status: 'draft' as const,
-      creativeBrief: 'Affiche photo 4K / Vidéo Reel 9:16',
+      creativeBrief: 'Vidéo courte 9:16',
       mediaUrls: [],
       orderIndex: currentWorkspacePosts.length + 1,
       createdAt: new Date().toISOString(),
@@ -93,116 +90,107 @@ export default function AppTopbar() {
 
   return (
     <>
-      <header className="bg-[#0b0c10]/95 backdrop-blur-xl border-b border-zinc-800/80 px-6 py-3.5 shrink-0 flex flex-col gap-3.5 z-20">
+      <header className="bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-6 py-3.5 shrink-0 flex flex-col gap-3.5 z-20">
         
-        {/* Top line: Workspace context, View switcher & Action CTAs */}
+        {/* Top line */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
           
-          {/* Left: Sheet & Month Identity */}
+          {/* Left: Month info & metrics */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shrink-0">
-              <CalendarDays className="w-5 h-5" />
-            </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-bold text-zinc-100 tracking-tight">
+                <h1 className="text-sm font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
                   Octobre 2026
                 </h1>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-zinc-800/80 text-zinc-300 border border-zinc-700/60">
-                  Feuille Réelle
+                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
+                  {totalCount} publications
                 </span>
-                <span className="text-[10px] font-mono text-zinc-400">
-                  {totalCount} posts au planning
-                </span>
-              </div>
-              <div className="flex items-center gap-3 text-xs text-zinc-400 mt-0.5">
-                <span className="flex items-center gap-1 text-emerald-400 font-mono">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{approvedCount} validés ({approvalRate}%)</span>
+                <span className="text-[10px] font-mono text-zinc-500">
+                  {approvedCount} validées ({approvalRate}%)
                 </span>
                 {changesCount > 0 && (
-                  <span className="flex items-center gap-1 text-amber-400 font-mono">
-                    <AlertCircle className="w-3.5 h-3.5" />
-                    <span>{changesCount} retouches</span>
-                  </span>
-                )}
-                {pendingCount > 0 && (
-                  <span className="text-zinc-500 font-mono">
-                    • {pendingCount} en attente
+                  <span className="text-[10px] font-mono text-zinc-500">
+                    • {changesCount} retouches
                   </span>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Center: View Switcher (Calendar, Table, Radar) */}
-          <div className="flex items-center bg-zinc-900/90 border border-zinc-800 p-1 rounded-xl self-start lg:self-center shadow-xs">
+          {/* Center: Clean Segmented View Switcher */}
+          <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800 self-start lg:self-center">
             <button
               onClick={() => setActiveView('calendar')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 activeView === 'calendar'
-                  ? 'bg-zinc-800 text-white shadow-xs border border-zinc-700/80'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
-              <Calendar className="w-3.5 h-3.5 text-amber-400" />
-              <span>Calendrier Mensuel</span>
+              Calendrier
             </button>
 
             <button
               onClick={() => setActiveView('table')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 activeView === 'table'
-                  ? 'bg-zinc-800 text-white shadow-xs border border-zinc-700/80'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
-              <Table2 className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Grille Tableur 12 Colonnes</span>
+              Tableur 12 Colonnes
             </button>
 
             <button
               onClick={() => setActiveView('inspiration')}
-              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 activeView === 'inspiration'
-                  ? 'bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 shadow-xs border border-amber-500/30'
-                  : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50'
+                  ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
               }`}
             >
-              <Flame className="w-3.5 h-3.5 text-amber-400" />
-              <span>Radar Veille & Outliers</span>
+              Radar Concurrentiel
             </button>
           </div>
 
-          {/* Right: Actions */}
+          {/* Right: Actions & Theme Toggle */}
           <div className="flex items-center gap-2 self-start lg:self-center">
             
+            {/* Theme Toggle (Light / Dark) */}
+            <button
+              onClick={toggleTheme}
+              className="w-8 h-8 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-center text-zinc-600 dark:text-zinc-400 transition-colors"
+              title={theme === 'dark' ? 'Activer le mode clair' : 'Activer le mode sombre'}
+            >
+              {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
+
             {/* New Post Button */}
             <button
               onClick={handleCreateNewPost}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-md transition-all active:scale-[0.96]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-black font-semibold text-xs transition-all hover:opacity-90 active:scale-[0.98]"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>Nouveau Post</span>
+              <Plus className="w-3.5 h-3.5" />
+              <span>Nouveau post</span>
             </button>
 
             {/* Import Excel */}
             <button
               onClick={() => setIsImportModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-medium text-xs border border-zinc-800 transition-all active:scale-[0.97]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-medium text-xs transition-all"
               title="Importer un fichier XLSX"
             >
-              <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Importer XLSX</span>
+              <FileSpreadsheet className="w-3.5 h-3.5 text-zinc-500" />
+              <span className="hidden sm:inline">Importer</span>
             </button>
 
             {/* Export Excel */}
             <button
               onClick={handleExportExcel}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-medium text-xs border border-zinc-800 transition-all active:scale-[0.97]"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-medium text-xs transition-all"
               title="Exporter vers Excel"
             >
-              <Download className="w-3.5 h-3.5 text-zinc-400" />
+              <Download className="w-3.5 h-3.5 text-zinc-500" />
               <span className="hidden sm:inline">Exporter</span>
             </button>
 
@@ -210,33 +198,33 @@ export default function AppTopbar() {
 
         </div>
 
-        {/* Second Line: Search & Granular Filters (Shown on Calendar & Table) */}
+        {/* Second Line: Search & Simple Filters */}
         {activeView !== 'inspiration' && (
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-800/60 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-900 text-xs">
             
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] max-w-md">
-              <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+            {/* Search */}
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Rechercher par thème, boisson, mot-clé, date..."
+                placeholder="Rechercher une publication, date, produit..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-zinc-900/90 border border-zinc-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all"
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-1.5 text-xs text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 transition-all"
               />
             </div>
 
-            {/* Platform filter pills */}
-            <div className="flex items-center gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
-              <span className="text-[11px] text-zinc-500 px-2 font-medium">Réseau :</span>
+            {/* Platform filter */}
+            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <span className="text-[10px] uppercase font-mono text-zinc-400 px-2 font-medium">Réseau :</span>
               {(['all', 'instagram', 'facebook', 'tiktok', 'linkedin'] as const).map((plat) => (
                 <button
                   key={plat}
                   onClick={() => setSelectedPlatform(plat)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                     selectedPlatform === plat
-                      ? 'bg-zinc-800 text-white font-semibold border border-zinc-700/80 shadow-xs'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
                   {plat === 'all' ? 'Tous' : plat === 'instagram' ? 'Instagram' : plat === 'facebook' ? 'Facebook' : plat === 'tiktok' ? 'TikTok' : 'LinkedIn'}
@@ -244,17 +232,17 @@ export default function AppTopbar() {
               ))}
             </div>
 
-            {/* Week Filter Pills */}
-            <div className="flex items-center gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
-              <span className="text-[11px] text-zinc-500 px-2 font-medium">Semaine :</span>
+            {/* Week Filter */}
+            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <span className="text-[10px] uppercase font-mono text-zinc-400 px-2 font-medium">Semaine :</span>
               {(['all', 'S1', 'S2', 'S3', 'S4'] as const).map((w) => (
                 <button
                   key={w}
                   onClick={() => setSelectedWeek(w)}
-                  className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded text-xs font-mono font-medium transition-all ${
                     selectedWeek === w
-                      ? 'bg-amber-500 text-black font-bold shadow-xs'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
                   {w === 'all' ? 'Toutes' : w}
@@ -263,19 +251,19 @@ export default function AppTopbar() {
             </div>
 
             {/* Status Filter */}
-            <div className="flex items-center gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
-              <span className="text-[11px] text-zinc-500 px-2 font-medium">Statut :</span>
+            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <span className="text-[10px] uppercase font-mono text-zinc-400 px-2 font-medium">Statut :</span>
               {(['all', 'approved', 'pending_review', 'changes_requested', 'draft'] as const).map((st) => (
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(st)}
-                  className={`px-2 py-1 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2 py-1 rounded text-xs font-medium transition-all ${
                     selectedStatus === st
-                      ? 'bg-zinc-800 text-white font-semibold border border-zinc-700/80 shadow-xs'
-                      : 'text-zinc-400 hover:text-zinc-200'
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
-                  {st === 'all' ? 'Tous' : st === 'approved' ? '✓ Validé' : st === 'pending_review' ? '⏳ En attente' : st === 'changes_requested' ? '⚠️ Retouche' : 'Brouillon'}
+                  {st === 'all' ? 'Tous' : st === 'approved' ? 'Validé' : st === 'pending_review' ? 'En attente' : st === 'changes_requested' ? 'Retouche' : 'Brouillon'}
                 </button>
               ))}
             </div>

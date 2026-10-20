@@ -29,6 +29,8 @@ interface PostPilotContextType {
   importPosts: (newPosts: Post[]) => void;
   addPostFeedback: (postId: string, comment: string, approved: boolean) => void;
   dispatchToMakeWebhook: (post: Post) => Promise<{ success: boolean; message: string }>;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
 }
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
@@ -46,6 +48,37 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+
+  // Synchronisation du thème sombre / clair
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('postpilot_theme') as 'dark' | 'light' | null;
+      if (savedTheme) {
+        setTheme(savedTheme);
+        if (savedTheme === 'light') {
+          document.documentElement.classList.remove('dark');
+        } else {
+          document.documentElement.classList.add('dark');
+        }
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('postpilot_theme', next);
+      if (next === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    }
+  };
 
   // Initialisation des posts depuis le localStorage ou le JSON initial
   useEffect(() => {
@@ -268,6 +301,8 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         importPosts,
         addPostFeedback,
         dispatchToMakeWebhook,
+        theme,
+        toggleTheme,
       }}
     >
       {children}

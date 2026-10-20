@@ -3,31 +3,22 @@
 import React, { useState } from 'react';
 import { usePostPilot } from '@/context/PostPilotContext';
 import { COMPETITIVE_RADAR_VIDEOS } from '@/lib/data/competitive-radar-data';
-import { ViralOutlierVideo } from '@/types/radar';
+import { ViralOutlierVideo, RadarCategory } from '@/types/radar';
 import { 
-  Flame, 
-  ExternalLink, 
-  Sparkles, 
   Play, 
-  Clock, 
-  Eye, 
-  Plus, 
-  Volume2, 
-  ChevronRight, 
-  ShieldCheck, 
+  ArrowUpRight, 
   X 
 } from 'lucide-react';
 
 export default function InspirationRadar() {
   const { activeWorkspace, importPosts, setSelectedPost } = usePostPilot();
 
-  // Filtres
-  const [timeframe, setTimeframe] = useState<'24h' | '48h' | '7d' | 'all'>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [crawlFrequency, setCrawlFrequency] = useState<'24h' | '48h' | 'weekly'>('24h');
+  // Filtres épurés
+  const [timeframe, setTimeframe] = useState<'all' | '24h' | '48h' | '7d'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<'all' | RadarCategory>('all');
+  const [minMultiplier, setMinMultiplier] = useState<'all' | '5x' | '8x'>('all');
   const [selectedVideoForAnalysis, setSelectedVideoForAnalysis] = useState<ViralOutlierVideo | null>(null);
 
-  // Vidéos filtrées par workspace et critères
   const workspaceVideos = COMPETITIVE_RADAR_VIDEOS.filter(v => v.workspaceId === activeWorkspace.id);
 
   const filteredVideos = workspaceVideos.filter(v => {
@@ -37,12 +28,11 @@ export default function InspirationRadar() {
     if (timeframe === '48h' && v.timeAgo.includes('3 jours')) {
       return false;
     }
-    if (selectedCategory !== 'all') {
-      if (selectedCategory === 'bubble_tea' && v.niche !== 'bubble_tea') return false;
-      if (selectedCategory === 'food_resto' && v.niche !== 'food_resto') return false;
-      if (selectedCategory === 'asmr' && !v.secretFormula.toLowerCase().includes('asmr')) return false;
-      if (selectedCategory === 'humour' && !v.secretFormula.toLowerCase().includes('humour') && !v.secretFormula.toLowerCase().includes('autodérision')) return false;
+    if (selectedCategory !== 'all' && v.category !== selectedCategory) {
+      return false;
     }
+    if (minMultiplier === '5x' && v.outlierMultiplier < 5) return false;
+    if (minMultiplier === '8x' && v.outlierMultiplier < 8) return false;
     return true;
   });
 
@@ -55,14 +45,14 @@ export default function InspirationRadar() {
       dayOfWeek: 'Ven.',
       time: '12:00',
       platforms: [video.platform] as ('instagram' | 'tiktok')[],
-      objective: 'Viralité & Notoriété Outlier',
+      objective: 'Notoriété & Performance',
       format: 'video' as const,
-      theme: video.hookText.replace(/[«»]/g, ''),
-      caption: `${video.hookText}\n\n👉 ${video.angleToAdapt}\n\n📍 Rendez-vous à Riviera Bonoumin (Face Abidjan Mall)\n📲 Commande & livraison WhatsApp : 05 96 93 50 50`,
+      theme: video.hookText,
+      caption: `${video.hookText}\n\n${video.adaptationStrategy}\n\nRiviera Bonoumin (Face Abidjan Mall)\nContact : +225 05 96 93 50 50`,
       featuredProduct: video.suggestedProduct || 'Bubble Tea Signature',
       cta: 'Commander au 05 96 93 50 50',
       status: 'draft' as const,
-      creativeBrief: `Inspiré de l'outlier ${video.competitorHandle} (${video.viewsFormatted} vues, ${video.outlierMultiplier}x) :\n- Formule : ${video.secretFormula}\n- Audio : ${video.audioTrendingTitle || 'Audio tendance'}\n- Angle vidéo : ${video.angleToAdapt}`,
+      creativeBrief: `Référence ${video.competitorHandle} (${video.viewsFormatted} vues, ${video.outlierMultiplier}x médiane) :\n- Structure : ${video.structureNote}\n- Piste audio : ${video.audioTrack || 'Audio de référence'}\n- Angle : ${video.adaptationStrategy}`,
       mediaUrls: [video.videoThumbnail],
       orderIndex: 99,
       createdAt: new Date().toISOString(),
@@ -74,127 +64,102 @@ export default function InspirationRadar() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-[#090a0f] text-zinc-100 overflow-y-auto">
-      {/* Top Banner: Status & Stats Bar */}
-      <div className="border-b border-zinc-800/80 bg-zinc-950/70 backdrop-blur-xl px-6 py-4 sticky top-0 z-20">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-y-auto">
+      
+      {/* Top Header Strip: Ultra-minimalist */}
+      <div className="border-b border-zinc-200 dark:border-zinc-800/80 bg-white/80 dark:bg-black/80 backdrop-blur-md px-6 py-4 sticky top-0 z-20">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
           
           <div>
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
-              </span>
-              <h2 className="text-sm font-bold tracking-tight text-zinc-100 uppercase flex items-center gap-2">
-                <span>Radar de Veille & Outliers Viraux</span>
-                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">
-                  Veille {crawlFrequency} Active
-                </span>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50 uppercase">
+                Radar de Veille & Outliers
               </h2>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
+                Veille active
+              </span>
             </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              Surveillance continue des vidéos qui ont sur-performé leur moyenne chez vos concurrents directs à Abidjan & dans le monde.
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Sélection des formats vidéo ayant dépassé leur médiane de diffusion récente sur Instagram et TikTok.
             </p>
           </div>
 
-          {/* Quick Frequency & Token Optim Bar */}
-          <div className="flex items-center gap-2.5 bg-zinc-900/90 border border-zinc-800 p-1.5 rounded-xl shrink-0">
-            <span className="text-[11px] font-medium text-zinc-400 px-2 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Fréquence du crawl :</span>
-            </span>
-            <div className="flex items-center gap-1">
-              {(['24h', '48h', 'weekly'] as const).map((freq) => (
-                <button
-                  key={freq}
-                  onClick={() => setCrawlFrequency(freq)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
-                    crawlFrequency === freq
-                      ? 'bg-amber-500 text-black font-semibold shadow-xs'
-                      : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60'
-                  }`}
-                >
-                  {freq === '24h' ? '24h (Max réactivité)' : freq === '48h' ? '48h (Éco-tokens)' : '7j'}
-                </button>
-              ))}
+          {/* Quick Metrics */}
+          <div className="flex items-center gap-4 text-xs font-mono text-zinc-500 dark:text-zinc-400">
+            <div>
+              <span className="text-zinc-950 dark:text-zinc-100 font-semibold">{workspaceVideos.length}</span> vidéos indexées
+            </div>
+            <div className="h-3 w-px bg-zinc-200 dark:bg-zinc-800" />
+            <div>
+              Médiane moyenne : <span className="text-zinc-950 dark:text-zinc-100 font-semibold">8.7x</span>
             </div>
           </div>
 
         </div>
 
-        {/* Filter Pills */}
-        <div className="max-w-7xl mx-auto mt-4 pt-3 border-t border-zinc-800/60 flex flex-wrap items-center justify-between gap-3 text-xs">
+        {/* Clean Filter Controls */}
+        <div className="max-w-7xl mx-auto mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-900 flex flex-wrap items-center justify-between gap-3 text-xs">
           
-          {/* Timeframe selector */}
-          <div className="flex items-center gap-1.5 bg-zinc-900/60 p-1 rounded-lg border border-zinc-800">
-            <span className="text-zinc-500 text-[11px] px-2 font-medium">Période :</span>
-            {(['all', '24h', '48h', '7d'] as const).map((t) => (
+          {/* Format / Category Selector */}
+          <div className="flex items-center gap-1 overflow-x-auto py-0.5">
+            {[
+              { id: 'all', label: 'Tous les formats' },
+              { id: 'demonstration', label: 'Démonstration produit' },
+              { id: 'situation', label: 'Mise en situation' },
+              { id: 'avis', label: 'Témoignage & Débat' },
+              { id: 'coulisses', label: 'Coulisses de préparation' },
+            ].map((cat) => (
               <button
-                key={t}
-                onClick={() => setTimeframe(t)}
-                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
-                  timeframe === t
-                    ? 'bg-zinc-800 text-white font-semibold border border-zinc-700/80 shadow-xs'
-                    : 'text-zinc-400 hover:text-zinc-200'
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id as typeof selectedCategory)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap ${
+                  selectedCategory === cat.id
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold'
+                    : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900'
                 }`}
               >
-                {t === 'all' ? 'Toutes' : t === '24h' ? '⚡ Dernières 24h' : t === '48h' ? 'Dernières 48h' : '7 jours'}
+                {cat.label}
               </button>
             ))}
           </div>
 
-          {/* Category filter */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <button
-              onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                selectedCategory === 'all'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              Tous ({workspaceVideos.length})
-            </button>
-            <button
-              onClick={() => setSelectedCategory('bubble_tea')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                selectedCategory === 'bubble_tea'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              🧋 Bubble Tea
-            </button>
-            <button
-              onClick={() => setSelectedCategory('asmr')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                selectedCategory === 'asmr'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              🔊 ASMR & Texture
-            </button>
-            <button
-              onClick={() => setSelectedCategory('food_resto')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                selectedCategory === 'food_resto'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              🍗 Food & Combos
-            </button>
-            <button
-              onClick={() => setSelectedCategory('humour')}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
-                selectedCategory === 'humour'
-                  ? 'bg-amber-500/15 border-amber-500/40 text-amber-300'
-                  : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-zinc-200'
-              }`}
-            >
-              🇨🇮 Humour & Nouchi
-            </button>
+          {/* Right Sub-filters: Timeframe & Outlier threshold */}
+          <div className="flex items-center gap-2">
+            
+            {/* Timeframe selector */}
+            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-md border border-zinc-200 dark:border-zinc-800">
+              {(['all', '24h', '48h', '7d'] as const).map((t) => (
+                <button
+                  key={t}
+                  onClick={() => setTimeframe(t)}
+                  className={`px-2 py-1 rounded text-[11px] font-medium transition-all ${
+                    timeframe === t
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  {t === 'all' ? 'Toutes' : t === '24h' ? '24h' : t === '48h' ? '48h' : '7j'}
+                </button>
+              ))}
+            </div>
+
+            {/* Multiplier selector */}
+            <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-md border border-zinc-200 dark:border-zinc-800">
+              {(['all', '5x', '8x'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMinMultiplier(m)}
+                  className={`px-2 py-1 rounded text-[11px] font-mono font-medium transition-all ${
+                    minMultiplier === m
+                      ? 'bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white shadow-xs font-semibold'
+                      : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-white'
+                  }`}
+                >
+                  {m === 'all' ? 'Tous' : `≥ ${m}`}
+                </button>
+              ))}
+            </div>
+
           </div>
 
         </div>
@@ -203,95 +168,50 @@ export default function InspirationRadar() {
       {/* Main Grid: Smartphone Video Mockups */}
       <div className="max-w-7xl mx-auto w-full p-6 space-y-6">
         
-        {/* Intro KPI Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-              <Flame className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-[11px] text-zinc-400 font-medium">Sur-performance moy.</div>
-              <div className="text-lg font-bold text-zinc-100 font-mono tracking-tight">+8.7x Médiane</div>
-            </div>
-          </div>
-
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
-              <Eye className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-[11px] text-zinc-400 font-medium">Vues captées (24-48h)</div>
-              <div className="text-lg font-bold text-zinc-100 font-mono tracking-tight">2.64M Vues</div>
-            </div>
-          </div>
-
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-[11px] text-zinc-400 font-medium">Comptes analysés</div>
-              <div className="text-lg font-bold text-zinc-100 font-mono tracking-tight">8 Spots Niche</div>
-            </div>
-          </div>
-
-          <div className="bg-zinc-900/50 border border-zinc-800/80 rounded-2xl p-4 flex items-center gap-3.5 shadow-sm">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-              <Sparkles className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-[11px] text-zinc-400 font-medium">Angles prêts à tourner</div>
-              <div className="text-lg font-bold text-zinc-100 font-mono tracking-tight">100% Adaptables</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Video Cards Grid */}
+        {/* Grid of Mockups */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => (
             <div
               key={video.id}
-              className="bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700/80 rounded-3xl p-5 flex flex-col justify-between transition-all duration-200 group shadow-lg hover:shadow-2xl"
+              className="bg-zinc-50/70 dark:bg-[#0c0d10] border border-zinc-200 dark:border-zinc-800/80 rounded-2xl p-4 flex flex-col justify-between transition-all duration-150 hover:border-zinc-400 dark:hover:border-zinc-600"
             >
-              {/* Smartphone Mockup Body */}
               <div>
                 
-                {/* Smartphone Container */}
-                <div className="relative w-full aspect-[9/14] bg-black rounded-2xl overflow-hidden border-2 border-zinc-800 shadow-2xl mb-4 group-hover:border-amber-500/30 transition-colors">
+                {/* Smartphone Mockup Frame */}
+                <div className="relative w-full aspect-[9/13] bg-zinc-950 rounded-xl overflow-hidden border border-zinc-300 dark:border-zinc-800 shadow-md mb-3.5 group">
                   
-                  {/* Smartphone Dynamic Island Notch */}
-                  <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-20 h-3.5 bg-black/90 border border-white/10 rounded-full z-20 flex items-center justify-end px-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500/70"></div>
+                  {/* Dynamic Island Notch Minimal */}
+                  <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-3 bg-black rounded-full z-20 flex items-center justify-end px-1.5">
+                    <div className="w-1 h-1 rounded-full bg-zinc-700"></div>
                   </div>
 
-                  {/* Video Thumbnail Background */}
+                  {/* Poster Image */}
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={video.videoThumbnail}
                     alt={video.hookText}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover grayscale-[15%] group-hover:grayscale-0 transition-all duration-300"
                   />
 
-                  {/* Gradient Overlay for Readable Text */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/60 z-10"></div>
+                  {/* Gradient for Text Readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/40 z-10" />
 
-                  {/* Top Bar: Competitor Info & Outlier Badge */}
-                  <div className="absolute top-7 inset-x-3.5 flex items-center justify-between z-15">
-                    <div className="flex items-center gap-2 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+                  {/* Top Bar inside Screen */}
+                  <div className="absolute top-5 inset-x-3 flex items-center justify-between z-15">
+                    <div className="flex items-center gap-2 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-md border border-white/10">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={video.competitorAvatar}
                         alt={video.competitorHandle}
-                        className="w-4 h-4 rounded-full object-cover"
+                        className="w-3.5 h-3.5 rounded-full object-cover"
                       />
-                      <span className="text-[11px] font-semibold text-white tracking-tight truncate max-w-[110px]">
+                      <span className="text-[11px] font-medium text-white truncate max-w-[120px]">
                         {video.competitorHandle}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 bg-amber-500/90 text-black px-2.5 py-1 rounded-full font-bold text-[11px] shadow-sm">
-                      <Flame className="w-3 h-3 fill-black" />
-                      <span>{video.outlierMultiplier}x Outlier</span>
+                    <div className="bg-white text-black font-mono font-bold text-[10px] px-2 py-0.5 rounded shadow-xs">
+                      {video.outlierMultiplier}x
                     </div>
                   </div>
 
@@ -300,103 +220,78 @@ export default function InspirationRadar() {
                     href={video.videoUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="absolute inset-0 flex items-center justify-center z-15 group/play cursor-pointer"
+                    className="absolute inset-0 flex items-center justify-center z-15 cursor-pointer group/btn"
+                    title="Ouvrir sur Instagram"
                   >
-                    <div className="w-14 h-14 rounded-full bg-black/50 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-2xl group-hover/play:scale-110 group-hover/play:bg-amber-500 group-hover/play:text-black group-hover/play:border-amber-400 transition-all duration-200">
-                      <Play className="w-6 h-6 ml-0.5 fill-current" />
+                    <div className="w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white group-hover/btn:scale-105 group-hover/btn:bg-white group-hover/btn:text-black transition-all">
+                      <Play className="w-5 h-5 ml-0.5 fill-current" />
                     </div>
                   </a>
 
-                  {/* Bottom Stats & Duration inside phone screen */}
-                  <div className="absolute bottom-3 inset-x-3.5 z-15 space-y-2">
-                    
-                    {/* Hook Text Card */}
-                    <div className="bg-zinc-950/80 backdrop-blur-md border border-white/10 p-2.5 rounded-xl">
-                      <div className="text-[10px] font-semibold tracking-wider uppercase text-amber-400 mb-0.5">
-                        Hook vérifié ({video.timeAgo})
-                      </div>
-                      <p className="text-xs font-medium text-white line-clamp-2 leading-snug">
+                  {/* Bottom Captions inside Screen */}
+                  <div className="absolute bottom-3 inset-x-3 z-15 space-y-1.5">
+                    <div className="bg-black/75 backdrop-blur-sm border border-white/10 p-2.5 rounded-lg text-white">
+                      <p className="text-xs font-medium leading-snug line-clamp-2">
                         {video.hookText}
                       </p>
                     </div>
 
-                    {/* Stats strip */}
-                    <div className="flex items-center justify-between text-[11px] text-zinc-300 px-1">
-                      <div className="flex items-center gap-1.5 font-mono font-semibold text-emerald-400">
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>{video.viewsFormatted} vues</span>
-                      </div>
-                      <div className="text-[10px] text-zinc-400 font-mono">
-                        (médiane: {Math.round(video.accountMedianViews / 1000)}K)
-                      </div>
-                      <div className="text-[10px] bg-black/60 px-2 py-0.5 rounded border border-white/10 font-mono">
-                        {video.duration}
-                      </div>
+                    <div className="flex items-center justify-between text-[10px] text-zinc-300 font-mono px-1">
+                      <span>{video.viewsFormatted} vues</span>
+                      <span>(médiane : {Math.round(video.accountMedianViews / 1000)}K)</span>
+                      <span>{video.duration}</span>
                     </div>
-
                   </div>
 
                 </div>
 
-                {/* Performance Analysis & Why it Worked */}
-                <div className="space-y-3 mb-4">
+                {/* Analysis Notes */}
+                <div className="space-y-2 mb-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
-                      Formule décortiquée
+                    <span className="text-[10px] uppercase font-mono font-semibold text-zinc-500 dark:text-zinc-400">
+                      {video.categoryLabel}
                     </span>
-                    <span className="text-[11px] text-zinc-300 font-medium bg-zinc-800/80 px-2 py-0.5 rounded-md border border-zinc-700/60">
-                      {video.competitorName}
+                    <span className="text-[10px] font-mono text-zinc-400">
+                      {video.timeAgo}
                     </span>
                   </div>
 
-                  <p className="text-xs text-zinc-300 leading-relaxed bg-zinc-950/60 p-3 rounded-xl border border-zinc-800/70">
-                    <span className="text-amber-400 font-semibold block mb-1">
-                      ⚡ Pourquoi l&apos;algorithme l&apos;a propulsé :
-                    </span>
+                  <p className="text-xs text-zinc-600 dark:text-zinc-300 leading-relaxed bg-white dark:bg-zinc-950 p-2.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+                    <strong className="text-zinc-950 dark:text-zinc-100 block mb-0.5">Raison du pic :</strong>
                     {video.whyItPerformed}
                   </p>
-
-                  {video.audioTrendingTitle && (
-                    <div className="flex items-center gap-2 text-[11px] text-zinc-400 bg-zinc-900/90 px-3 py-1.5 rounded-lg border border-zinc-800/80">
-                      <Volume2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <span className="truncate">{video.audioTrendingTitle}</span>
-                    </div>
-                  )}
                 </div>
 
               </div>
 
-              {/* Action Buttons */}
-              <div className="space-y-2 pt-3 border-t border-zinc-800/80">
+              {/* Action Buttons: Clean & Direct */}
+              <div className="space-y-1.5 pt-2 border-t border-zinc-200 dark:border-zinc-800">
                 
                 {/* 1. Direct Instagram/TikTok Link */}
                 <a
                   href={video.videoUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-amber-600/20 hover:from-pink-600/30 hover:via-purple-600/30 hover:to-amber-600/30 border border-pink-500/30 hover:border-pink-500/60 text-white font-semibold text-xs transition-all active:scale-[0.97]"
+                  className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-black font-semibold text-xs transition-all hover:opacity-90 active:scale-[0.98]"
                 >
-                  <span>Voir la vidéo sur {video.platform === 'instagram' ? 'Instagram' : 'TikTok'}</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-pink-400" />
+                  <span>Consulter sur {video.platform === 'instagram' ? 'Instagram' : 'TikTok'}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
                 </a>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {/* 2. Convert to Calendar Post */}
+                {/* 2. Secondary actions */}
+                <div className="grid grid-cols-2 gap-1.5">
                   <button
                     onClick={() => handleConvertOutlierToPost(video)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-all active:scale-[0.96] shadow-sm"
+                    className="py-1.5 px-2.5 rounded-lg bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium text-xs transition-all active:scale-[0.98]"
                   >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Adapter au post</span>
+                    Créer le post
                   </button>
 
-                  {/* 3. Deep Analysis Modal */}
                   <button
                     onClick={() => setSelectedVideoForAnalysis(video)}
-                    className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs transition-all active:scale-[0.96] border border-zinc-700/60"
+                    className="py-1.5 px-2.5 rounded-lg border border-zinc-300 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 font-medium text-xs transition-all active:scale-[0.98]"
                   >
-                    <span>Script détaillé</span>
-                    <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
+                    Fiche détaillée
                   </button>
                 </div>
 
@@ -408,90 +303,79 @@ export default function InspirationRadar() {
 
       </div>
 
-      {/* Reverse-Engineering Detail Modal */}
+      {/* Detail Modal */}
       {selectedVideoForAnalysis && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-700 rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative space-y-5 animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-[#111215] border border-zinc-300 dark:border-zinc-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative space-y-4 animate-in fade-in duration-100">
             
-            {/* Modal Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-                  <Flame className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-white">
-                    Formule de Tournage & Reverse-Engineering
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-zinc-400">
-                    <span>{selectedVideoForAnalysis.competitorHandle}</span>
-                    <span>•</span>
-                    <span className="text-emerald-400 font-mono font-semibold">
-                      {selectedVideoForAnalysis.viewsFormatted} vues ({selectedVideoForAnalysis.outlierMultiplier}x)
-                    </span>
-                  </div>
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-200 dark:border-zinc-800">
+              <div>
+                <h3 className="text-sm font-bold text-zinc-950 dark:text-zinc-100 uppercase tracking-tight">
+                  Fiche de Décomposition Vidéo
+                </h3>
+                <div className="text-xs text-zinc-500 font-mono mt-0.5">
+                  {selectedVideoForAnalysis.competitorHandle} • {selectedVideoForAnalysis.viewsFormatted} vues ({selectedVideoForAnalysis.outlierMultiplier}x)
                 </div>
               </div>
 
               <button
                 onClick={() => setSelectedVideoForAnalysis(null)}
-                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 flex items-center justify-center text-zinc-400 hover:text-white transition-colors"
+                className="w-7 h-7 rounded-md bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 flex items-center justify-center text-zinc-500 dark:text-zinc-300 transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="space-y-4 text-xs">
-              
+            {/* Content */}
+            <div className="space-y-3 text-xs">
               <div>
-                <span className="text-[11px] font-semibold uppercase text-zinc-400 block mb-1">
-                  1. Le Hook des 3 Premières Secondes (Ce qui stoppe le doigt)
+                <span className="text-[10px] font-mono uppercase text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Accroche (Premières secondes)
                 </span>
-                <div className="p-3 bg-zinc-950 rounded-xl border border-zinc-800 text-zinc-200 font-medium">
+                <div className="p-3 bg-zinc-50 dark:bg-black rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium">
                   {selectedVideoForAnalysis.hookText}
                 </div>
               </div>
 
               <div>
-                <span className="text-[11px] font-semibold uppercase text-zinc-400 block mb-1">
-                  2. Pourquoi ça a explosé sur l&apos;algorithme
+                <span className="text-[10px] font-mono uppercase text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Analyse de la rétention
                 </span>
-                <p className="text-zinc-300 leading-relaxed bg-zinc-950/80 p-3 rounded-xl border border-zinc-800">
+                <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed bg-zinc-50 dark:bg-black p-3 rounded-lg border border-zinc-200 dark:border-zinc-800">
                   {selectedVideoForAnalysis.whyItPerformed}
                 </p>
               </div>
 
               <div>
-                <span className="text-[11px] font-semibold uppercase text-amber-400 block mb-1">
-                  3. Plan d&apos;adaptation pour FruiThé (Riviera Bonoumin)
+                <span className="text-[10px] font-mono uppercase text-zinc-500 dark:text-zinc-400 block mb-1">
+                  Déclinaison pour FruiThé (Riviera Bonoumin)
                 </span>
-                <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/30 text-amber-200 leading-relaxed">
-                  {selectedVideoForAnalysis.angleToAdapt}
+                <div className="p-3 bg-zinc-100 dark:bg-zinc-900 rounded-lg border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 leading-relaxed">
+                  {selectedVideoForAnalysis.adaptationStrategy}
                 </div>
               </div>
 
               {selectedVideoForAnalysis.suggestedProduct && (
-                <div className="flex items-center justify-between p-3 bg-zinc-950 rounded-xl border border-zinc-800">
-                  <span className="text-zinc-400">Boisson / Produit vedette suggéré :</span>
-                  <span className="font-bold text-amber-400 font-mono">
+                <div className="flex items-center justify-between p-2.5 bg-zinc-50 dark:bg-black rounded-lg border border-zinc-200 dark:border-zinc-800">
+                  <span className="text-zinc-500 dark:text-zinc-400">Produit suggéré :</span>
+                  <span className="font-semibold text-zinc-950 dark:text-zinc-100">
                     {selectedVideoForAnalysis.suggestedProduct}
                   </span>
                 </div>
               )}
-
             </div>
 
-            {/* Modal Footer Actions */}
-            <div className="pt-3 border-t border-zinc-800 flex items-center justify-end gap-3">
+            {/* Footer */}
+            <div className="pt-3 border-t border-zinc-200 dark:border-zinc-800 flex items-center justify-end gap-2">
               <a
                 href={selectedVideoForAnalysis.videoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-medium text-xs flex items-center gap-2 transition-all"
+                className="px-3.5 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 text-xs font-medium hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-1.5"
               >
                 <span>Ouvrir sur Instagram</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <ArrowUpRight className="w-3.5 h-3.5" />
               </a>
 
               <button
@@ -499,10 +383,9 @@ export default function InspirationRadar() {
                   handleConvertOutlierToPost(selectedVideoForAnalysis);
                   setSelectedVideoForAnalysis(null);
                 }}
-                className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-2 transition-all active:scale-[0.96]"
+                className="px-4 py-2 rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-black text-xs font-semibold hover:opacity-90 transition-all active:scale-[0.98]"
               >
-                <Plus className="w-4 h-4" />
-                <span>Créer le post dans le calendrier</span>
+                Insérer dans le calendrier
               </button>
             </div>
 

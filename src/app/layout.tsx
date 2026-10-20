@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" className="dark">
-      <body className={`${inter.variable} font-sans bg-zinc-950 text-zinc-100 antialiased`}>
+      <body className={`${inter.variable} font-sans bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 antialiased`}>
         {children}
         <CookieConsentBanner />
       </body>

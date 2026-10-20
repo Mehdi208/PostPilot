@@ -8,17 +8,19 @@ import { updatePostClientFeedbackInFirestore } from '@/lib/firebase/firestore';
 import { 
   CheckCircle2, 
   MessageSquare, 
-  Sparkles, 
   X, 
-  Coffee, 
   Check, 
-  Send,
-  Download,
-  LayoutGrid,
-  ListFilter
+  Send, 
+  Download, 
+  LayoutGrid, 
+  ListFilter, 
+  Sun, 
+  Moon, 
+  Layers 
 } from 'lucide-react';
 
 const STORAGE_KEY_POSTS = 'postpilot_posts_v1';
+const STORAGE_KEY_THEME = 'postpilot_theme_mode';
 
 export default function ClientPreviewPage() {
   const params = useParams();
@@ -30,10 +32,21 @@ export default function ClientPreviewPage() {
   const [successToast, setSuccessToast] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'feed' | 'grid'>('feed');
   const [clientFilter, setClientFilter] = useState<'all' | 'pending' | 'approved' | 'changes'>('all');
-  const [celebratingPostId, setCelebratingPostId] = useState<string | null>(null);
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      // Load Theme
+      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME) as 'light' | 'dark' | null;
+      const initialTheme = savedTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      setTheme(initialTheme);
+      if (initialTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+
+      // Load Posts
       const saved = localStorage.getItem(STORAGE_KEY_POSTS);
       if (saved) {
         try {
@@ -49,6 +62,19 @@ export default function ClientPreviewPage() {
       setPosts(initialPostsData as unknown as Post[]);
     }
   }, []);
+
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setTheme(next);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_THEME, next);
+      if (next === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  };
 
   const savePosts = (newPosts: Post[]) => {
     setPosts(newPosts);
@@ -80,12 +106,8 @@ export default function ClientPreviewPage() {
     });
 
     savePosts(updated);
-    setCelebratingPostId(post.id);
-    setTimeout(() => setCelebratingPostId(null), 2500);
+    showNotification('Publication validée.');
 
-    showNotification('Publication validée avec succès ! 🎉');
-
-    // Sauvegarde en arrière-plan vers Firestore si configuré
     try {
       await updatePostClientFeedbackInFirestore(post.workspaceId, post.id, {
         approved: true,
@@ -93,7 +115,7 @@ export default function ClientPreviewPage() {
         updatedAt: new Date().toISOString(),
       });
     } catch {
-      // mode local silencieux
+      // mode local
     }
   };
 
@@ -127,7 +149,7 @@ export default function ClientPreviewPage() {
     const targetPost = selectedPostForFeedback;
     setSelectedPostForFeedback(null);
     setFeedbackText('');
-    showNotification('Votre demande de retouche a bien été transmise à Méhdi.');
+    showNotification('Remarque enregistrée et transmise.');
 
     try {
       await updatePostClientFeedbackInFirestore(targetPost.workspaceId, targetPost.id, feedbackObj);
@@ -149,73 +171,79 @@ export default function ClientPreviewPage() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-amber-500 selection:text-black">
+    <div className="min-h-screen bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 flex flex-col font-sans selection:bg-zinc-900 selection:text-white dark:selection:bg-white dark:selection:text-black">
+      
       {/* Toast Notification */}
       {successToast && (
-        <div className="fixed top-4 right-4 z-50 bg-emerald-500 text-zinc-950 font-semibold px-4 py-2.5 rounded-xl shadow-xl flex items-center gap-2 text-xs animate-in fade-in slide-in-from-top-4">
-          <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
+        <div className="fixed top-4 right-4 z-50 bg-zinc-900 dark:bg-white text-white dark:text-black font-medium px-4 py-2 rounded-lg shadow-lg flex items-center gap-2 text-xs animate-in fade-in slide-in-from-top-2 border border-zinc-700 dark:border-zinc-300">
+          <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
           <span>{successToast}</span>
         </div>
       )}
 
-      {/* Header Client Dédié */}
-      <header className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80 px-4 lg:px-8 py-3.5 flex items-center justify-between">
+      {/* Header Client Minimaliste Swiss */}
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-black/95 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800 px-4 lg:px-8 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-white font-bold text-xl shadow-md">
-            🧋
+          <div className="w-8 h-8 rounded-lg bg-zinc-950 dark:bg-white text-white dark:text-black flex items-center justify-center font-bold text-xs tracking-wider">
+            FT
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="font-bold text-sm lg:text-base text-zinc-100 tracking-tight">
+              <h1 className="font-semibold text-xs lg:text-sm tracking-tight text-zinc-900 dark:text-zinc-100 uppercase">
                 FruiThé Abidjan
               </h1>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 font-semibold border border-amber-500/20">
-                Espace Validation Partenaire
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500">
+                Portail de validation
               </span>
             </div>
-            <p className="text-[11px] text-zinc-400">
-              Calendrier Éditorial • Octobre 2026 {token ? `• Réf: ${token.slice(0, 8)}...` : ''}
+            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 font-mono">
+              Calendrier Éditorial • Octobre 2026 {token ? `• Réf. ${token.slice(0, 8)}` : ''}
             </p>
           </div>
         </div>
 
-        {/* Progression bar & switchers */}
+        {/* Right actions: Progress & Theme Toggle */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex flex-col items-end">
-            <span className="text-[11px] text-zinc-400 font-medium">
-              {approvedCount} sur {posts.length} publications validées
+            <span className="text-[11px] text-zinc-500 font-mono">
+              {approvedCount} / {posts.length} validées ({progressPercent}%)
             </span>
-            <div className="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden mt-1">
+            <div className="w-28 h-1 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden mt-1">
               <div 
-                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                className="h-full bg-zinc-950 dark:bg-white rounded-full transition-all duration-300"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
-          <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20">
-            {progressPercent}%
-          </span>
+
+          <button
+            onClick={toggleTheme}
+            className="w-8 h-8 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 flex items-center justify-center text-zinc-600 dark:text-zinc-400 transition-colors"
+            title={theme === 'dark' ? 'Mode clair' : 'Mode sombre'}
+          >
+            {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+          </button>
         </div>
       </header>
 
-      {/* Control Bar: Filters & View Modes */}
-      <div className="bg-zinc-900/60 border-b border-zinc-800/60 px-4 lg:px-8 py-2.5 flex items-center justify-between gap-3 text-xs flex-wrap">
-        {/* Status Filters */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-zinc-500 font-medium mr-1 text-[11px]">Afficher :</span>
+      {/* Control Bar: Filters & View Switcher */}
+      <div className="bg-zinc-50 dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800 px-4 lg:px-8 py-2.5 flex items-center justify-between gap-3 text-xs flex-wrap">
+        
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1">
           {[
             { id: 'all', label: `Toutes (${posts.length})` },
             { id: 'pending', label: `À valider (${pendingCount})` },
             { id: 'approved', label: `Validées (${approvedCount})` },
-            { id: 'changes', label: `Retouches (${changesCount})` },
+            { id: 'changes', label: `Retouches demandées (${changesCount})` },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setClientFilter(tab.id as typeof clientFilter)}
-              className={`px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
                 clientFilter === tab.id
-                  ? 'bg-zinc-800 text-white border border-zinc-700 shadow-xs'
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-black font-semibold shadow-xs'
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-900'
               }`}
             >
               {tab.label}
@@ -224,89 +252,90 @@ export default function ClientPreviewPage() {
         </div>
 
         {/* View Mode Toggle */}
-        <div className="flex items-center bg-zinc-950 border border-zinc-800 rounded-lg p-0.5">
+        <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-0.5">
           <button
             onClick={() => setViewMode('feed')}
             className={`p-1.5 rounded-md transition-all ${
-              viewMode === 'feed' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+              viewMode === 'feed' 
+                ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs' 
+                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
-            title="Vue Feed Détaillée"
+            title="Vue Détaillée"
           >
             <ListFilter className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={() => setViewMode('grid')}
             className={`p-1.5 rounded-md transition-all ${
-              viewMode === 'grid' ? 'bg-zinc-800 text-white' : 'text-zinc-500 hover:text-zinc-300'
+              viewMode === 'grid' 
+                ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs' 
+                : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200'
             }`}
-            title="Vue Grille Compacte"
+            title="Vue Grille"
           >
             <LayoutGrid className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 lg:p-6 space-y-6">
+      {/* Main Content */}
+      <main className="flex-1 max-w-4xl w-full mx-auto p-4 lg:p-8 space-y-6">
         {viewMode === 'feed' ? (
           /* Feed View */
           <div className="space-y-6">
             {displayedPosts.map((post) => {
               const isApproved = post.status === 'approved';
               const hasChanges = post.status === 'changes_requested';
-              const isCelebrating = celebratingPostId === post.id;
 
               return (
                 <article
                   key={post.id}
-                  className={`rounded-2xl border transition-all overflow-hidden relative ${
-                    isCelebrating
-                      ? 'ring-2 ring-emerald-500 bg-emerald-500/5'
-                      : isApproved
-                      ? 'bg-zinc-900/40 border-emerald-500/30'
+                  className={`rounded-xl border transition-all overflow-hidden bg-white dark:bg-zinc-950 ${
+                    isApproved
+                      ? 'border-zinc-300 dark:border-zinc-700'
                       : hasChanges
-                      ? 'bg-zinc-900/40 border-amber-500/30'
-                      : 'bg-zinc-900/80 border-zinc-800 hover:border-zinc-700'
+                      ? 'border-zinc-400 dark:border-zinc-600'
+                      : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700'
                   }`}
                 >
-                  {/* Card Header */}
-                  <div className="p-4 border-b border-zinc-800/80 flex items-center justify-between bg-zinc-950/40">
+                  {/* Card Top Info */}
+                  <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between bg-zinc-50/50 dark:bg-zinc-900/30">
                     <div className="flex items-center gap-2.5">
-                      <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-zinc-800 text-amber-400 border border-zinc-700">
+                      <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300">
                         {post.week}
                       </span>
                       <div>
-                        <div className="text-xs font-bold text-zinc-200">
+                        <div className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
                           {post.dayOfWeek} {post.scheduledDate}
                         </div>
-                        <div className="text-[10px] text-zinc-400 capitalize">
+                        <div className="text-[10px] text-zinc-500 font-mono capitalize">
                           {post.format} • {post.platforms.join(', ')}
                         </div>
                       </div>
                     </div>
 
-                    {/* Status Indicator */}
+                    {/* Status Badge */}
                     {isApproved ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        Validé par FruiThé
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-900 dark:text-zinc-100 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-700">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                        Validé
                       </span>
                     ) : hasChanges ? (
-                      <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
-                        <MessageSquare className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-700">
+                        <MessageSquare className="w-3 h-3" />
                         Retouche transmise
                       </span>
                     ) : (
-                      <span className="text-[11px] text-zinc-500 font-medium">
-                        En attente de votre avis
+                      <span className="text-[11px] text-zinc-400 font-mono">
+                        En attente
                       </span>
                     )}
                   </div>
 
-                  {/* Card Body */}
-                  <div className="p-4 lg:p-5 space-y-4">
-                    {/* Visual Section */}
-                    <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800/80 aspect-video flex items-center justify-center text-center p-4 relative group">
+                  {/* Card Content */}
+                  <div className="p-5 space-y-4">
+                    {/* Visual Media Placeholder or Real Image */}
+                    <div className="rounded-lg overflow-hidden bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 aspect-video flex items-center justify-center text-center p-4 relative group">
                       {post.mediaUrls && post.mediaUrls.length > 0 ? (
                         <>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -314,78 +343,77 @@ export default function ClientPreviewPage() {
                           <a
                             href={post.mediaUrls[0]}
                             download={`${post.id}_creative.jpg`}
-                            className="absolute bottom-2 right-2 p-2 rounded-lg bg-black/70 hover:bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1"
-                            title="Télécharger le visuel"
+                            className="absolute bottom-2 right-2 px-2.5 py-1.5 rounded bg-black/80 hover:bg-black text-white text-[11px] opacity-0 group-hover:opacity-100 transition-all flex items-center gap-1 font-mono"
                           >
-                            <Download className="w-3.5 h-3.5" />
+                            <Download className="w-3 h-3" />
                             <span>Télécharger</span>
                           </a>
                         </>
                       ) : (
-                        <div className="space-y-1">
-                          <Sparkles className="w-7 h-7 text-amber-400 mx-auto opacity-70" />
-                          <div className="text-xs font-semibold text-zinc-200">{post.theme}</div>
-                          <div className="text-[11px] text-zinc-400 max-w-md mx-auto">{post.creativeBrief}</div>
+                        <div className="space-y-1 text-center">
+                          <Layers className="w-5 h-5 text-zinc-400 mx-auto" />
+                          <div className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{post.theme}</div>
+                          <div className="text-[11px] text-zinc-400 max-w-md mx-auto line-clamp-2">{post.creativeBrief}</div>
                         </div>
                       )}
                     </div>
 
-                    {/* Theme & Caption */}
+                    {/* Theme and Caption */}
                     <div>
-                      <h3 className="font-bold text-sm text-zinc-100 mb-2">
+                      <h3 className="font-semibold text-xs lg:text-sm text-zinc-900 dark:text-zinc-100 mb-2">
                         {post.theme}
                       </h3>
-                      <div className="p-3.5 rounded-xl bg-zinc-950/60 border border-zinc-800/60 text-xs text-zinc-200 leading-relaxed whitespace-pre-line">
+                      <div className="p-3.5 rounded-lg bg-zinc-50 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line font-normal">
                         {post.caption}
                       </div>
                     </div>
 
-                    {/* Product & CTA Highlights */}
+                    {/* Metadata attributes */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       {post.featuredProduct && (
-                        <div className="p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 font-medium flex items-center gap-2">
-                          <Coffee className="w-4 h-4 shrink-0 text-amber-400" />
-                          <span>{post.featuredProduct}</span>
+                        <div className="p-2.5 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium flex items-center justify-between">
+                          <span className="text-[11px] text-zinc-400 uppercase font-mono">Produit :</span>
+                          <span className="truncate">{post.featuredProduct}</span>
                         </div>
                       )}
                       {post.cta && (
-                        <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-medium flex items-center gap-2">
-                          <span>📲</span>
+                        <div className="p-2.5 rounded-md bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium flex items-center justify-between">
+                          <span className="text-[11px] text-zinc-400 uppercase font-mono">Action :</span>
                           <span className="truncate">{post.cta}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Client note banner if changes requested */}
+                    {/* Feedback comment if requested */}
                     {post.clientFeedback?.comment && (
-                      <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 text-xs">
-                        <span className="font-semibold text-amber-400 block mb-0.5">Votre note de retouche :</span>
-                        <p className="text-zinc-300 italic">&quot;{post.clientFeedback.comment}&quot;</p>
+                      <div className="p-3 rounded-lg bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-xs">
+                        <span className="font-mono text-[10px] text-zinc-500 uppercase block mb-1">Votre consigne de retouche :</span>
+                        <p className="text-zinc-800 dark:text-zinc-200 italic">&ldquo;{post.clientFeedback.comment}&rdquo;</p>
                       </div>
                     )}
                   </div>
 
-                  {/* Actions Footer */}
-                  <div className="p-4 border-t border-zinc-800/80 bg-zinc-950/60 flex items-center justify-end gap-2.5">
+                  {/* Actions Bar */}
+                  <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/30 flex items-center justify-end gap-2.5">
                     <button
                       onClick={() => handleOpenFeedbackModal(post)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-300 hover:text-white bg-zinc-800 hover:bg-zinc-700 transition-all"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                      <MessageSquare className="w-3.5 h-3.5" />
                       <span>Demander une retouche</span>
                     </button>
 
                     <button
                       onClick={() => handleApprovePost(post)}
                       disabled={isApproved}
-                      className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                         isApproved
-                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950 shadow-md hover:scale-[1.02]'
+                          ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500 border border-zinc-200 dark:border-zinc-700 cursor-default'
+                          : 'bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black shadow-xs'
                       }`}
                     >
-                      <Check className="w-4 h-4 stroke-[2.5]" />
-                      <span>{isApproved ? 'Publication Validée' : 'Valider ce post'}</span>
+                      <Check className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{isApproved ? 'Publication validée' : 'Valider ce post'}</span>
                     </button>
                   </div>
                 </article>
@@ -393,7 +421,7 @@ export default function ClientPreviewPage() {
             })}
           </div>
         ) : (
-          /* Grid View (Compact) */
+          /* Grid View */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {displayedPosts.map((post) => {
               const isApproved = post.status === 'approved';
@@ -401,53 +429,53 @@ export default function ClientPreviewPage() {
               return (
                 <div
                   key={post.id}
-                  className="bg-zinc-900 border border-zinc-800 rounded-xl p-3.5 flex flex-col justify-between hover:border-zinc-700 transition-all"
+                  className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4 flex flex-col justify-between hover:border-zinc-300 dark:hover:border-zinc-700 transition-all"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-mono text-[10px] text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                      <span className="font-mono text-[10px] text-zinc-500 bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 px-1.5 py-0.5 rounded">
                         {post.scheduledDate}
                       </span>
                       {isApproved ? (
-                        <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
+                        <span className="text-[10px] text-zinc-900 dark:text-zinc-100 font-medium flex items-center gap-1">
+                          <Check className="w-3 h-3 stroke-[2]" />
                           <span>Validé</span>
                         </span>
                       ) : (
-                        <span className="text-[10px] text-zinc-500">À valider</span>
+                        <span className="text-[10px] text-zinc-400 font-mono">À valider</span>
                       )}
                     </div>
 
-                    <h4 className="font-bold text-xs text-zinc-200 line-clamp-2">
+                    <h4 className="font-medium text-xs text-zinc-900 dark:text-zinc-100 line-clamp-2">
                       {post.theme}
                     </h4>
 
-                    <p className="text-[11px] text-zinc-400 line-clamp-3 leading-relaxed">
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 line-clamp-3 leading-relaxed">
                       {post.caption}
                     </p>
 
                     {post.featuredProduct && (
-                      <div className="text-[10px] text-amber-400 font-medium truncate">
-                        🧋 {post.featuredProduct}
+                      <div className="text-[10px] text-zinc-600 dark:text-zinc-400 font-mono truncate">
+                        Produit : {post.featuredProduct}
                       </div>
                     )}
                   </div>
 
-                  <div className="pt-3 mt-3 border-t border-zinc-800/80 flex items-center gap-1.5">
+                  <div className="pt-3 mt-3 border-t border-zinc-100 dark:border-zinc-800 flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenFeedbackModal(post)}
-                      className="p-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 transition-all"
+                      className="p-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all"
                       title="Demander une retouche"
                     >
-                      <MessageSquare className="w-3.5 h-3.5 text-amber-400" />
+                      <MessageSquare className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleApprovePost(post)}
                       disabled={isApproved}
                       className={`flex-1 flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg text-xs font-semibold transition-all ${
                         isApproved
-                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-zinc-950'
+                          ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 border border-zinc-200 dark:border-zinc-700'
+                          : 'bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black'
                       }`}
                     >
                       <Check className="w-3.5 h-3.5 stroke-[2.5]" />
@@ -461,42 +489,42 @@ export default function ClientPreviewPage() {
         )}
       </main>
 
-      {/* Modal Retouche Client */}
+      {/* Modal Demande de Retouche */}
       {selectedPostForFeedback && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-2xl w-full max-w-lg p-5 shadow-2xl animate-in fade-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl w-full max-w-lg p-5 shadow-2xl animate-in fade-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-100 dark:border-zinc-800">
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-amber-400" />
-                <h3 className="font-bold text-sm text-zinc-100">
-                  Demande de retouche pour Méhdi
+                <MessageSquare className="w-4 h-4 text-zinc-900 dark:text-zinc-100" />
+                <h3 className="font-semibold text-xs tracking-tight text-zinc-900 dark:text-zinc-100 uppercase">
+                  Consigne de retouche éditoriale
                 </h3>
               </div>
               <button
                 onClick={() => setSelectedPostForFeedback(null)}
-                className="p-1 rounded text-zinc-400 hover:text-zinc-200"
+                className="p-1 rounded text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="py-4 space-y-3">
-              <p className="text-xs text-zinc-400">
-                Publication : <strong className="text-zinc-200">{selectedPostForFeedback.theme}</strong> ({selectedPostForFeedback.scheduledDate})
+              <p className="text-xs text-zinc-500">
+                Publication ciblée : <strong className="text-zinc-900 dark:text-zinc-100">{selectedPostForFeedback.theme}</strong> ({selectedPostForFeedback.scheduledDate})
               </p>
               <textarea
                 rows={4}
                 value={feedbackText}
                 onChange={(e) => setFeedbackText(e.target.value)}
-                placeholder="Ex : Peux-tu mettre l'accent sur le combo avec le thé chaud et ajuster le prix à 4 000 FCFA ?"
-                className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-xs text-zinc-100 focus:outline-none focus:border-amber-500/60 leading-relaxed"
+                placeholder="Indiquez ici vos modifications (accroche, prix, mise en avant produit, etc.)..."
+                className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-zinc-400 dark:focus:border-zinc-600 leading-relaxed font-normal"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-800">
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-800">
               <button
                 onClick={() => setSelectedPostForFeedback(null)}
-                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200"
+                className="px-3.5 py-1.5 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
               >
                 Annuler
               </button>
@@ -505,8 +533,8 @@ export default function ClientPreviewPage() {
                 disabled={!feedbackText.trim()}
                 className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   feedbackText.trim()
-                    ? 'bg-amber-500 hover:bg-amber-400 text-zinc-950'
-                    : 'bg-zinc-800 text-zinc-600 cursor-not-allowed'
+                    ? 'bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-200 dark:text-black'
+                    : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed'
                 }`}
               >
                 <Send className="w-3.5 h-3.5" />
@@ -517,13 +545,13 @@ export default function ClientPreviewPage() {
         </div>
       )}
 
-      {/* Footer */}
-      <footer className="p-4 border-t border-zinc-800 text-center text-xs text-zinc-400 space-y-1">
-        <div>PostPilot • Développé par Méhdi Traoré pour FruiThé Abidjan • {new Date().getFullYear()}</div>
-        <div className="text-[11px] text-zinc-500 space-x-3">
-          <a href="/mentions-legales" target="_blank" className="hover:text-zinc-300">Mentions Légales</a>
+      {/* Footer Minimaliste */}
+      <footer className="p-6 border-t border-zinc-200 dark:border-zinc-800 text-center text-xs text-zinc-400 space-y-1">
+        <div>PostPilot • Régie éditoriale et gestion de contenu • {new Date().getFullYear()}</div>
+        <div className="text-[11px] text-zinc-500 space-x-3 font-mono">
+          <a href="/mentions-legales" target="_blank" className="hover:text-zinc-900 dark:hover:text-zinc-200">Mentions Légales</a>
           <span>•</span>
-          <a href="/confidentialite" target="_blank" className="hover:text-zinc-300">Protection des Données (ARTCI)</a>
+          <a href="/confidentialite" target="_blank" className="hover:text-zinc-900 dark:hover:text-zinc-200">Protection des Données (ARTCI)</a>
         </div>
       </footer>
     </div>
