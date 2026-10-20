@@ -1,0 +1,43 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && request.auth.token.email != null;
+    }
+
+    // Workspaces collection
+    match /workspaces/{workspaceId} {
+      // Admin a plein accès
+      allow read, write: if isAdmin();
+      
+      // Accès public restreint au workspace pour valider le token de prévisualisation
+      allow get: if resource.data.previewToken != null;
+
+      // Posts sous-collection
+      match /posts/{postId} {
+        // Admin CM a les pleins pouvoirs
+        allow read, write: if isAdmin();
+
+        // Le client externe peut lire les posts prêts pour validation
+        allow read: if resource.data.status in ['pending_review', 'approved', 'changes_requested'];
+
+        // Le client externe peut uniquement modifier le feedback et le statut via preview
+        allow update: if request.resource.data.diff(resource.data).affectedKeys()
+                        .hasOnly(['clientFeedback', 'status', 'updatedAt'])
+                      && request.resource.data.status in ['approved', 'changes_requested'];
+      }
+    }
+
+    // Sécurité par défaut : rejet de tout le reste
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

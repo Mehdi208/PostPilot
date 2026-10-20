@@ -1,0 +1,338 @@
+[
+  {
+    "id": "fruithe-oct-1",
+    "workspaceId": "fruithe",
+    "week": "S1",
+    "scheduledDate": "2026-10-05",
+    "dayOfWeek": "Lun.",
+    "platforms": [
+      "facebook"
+    ],
+    "objective": "Notoriété & Sensibilisation",
+    "format": "text",
+    "theme": "Octobre Rose & Douceur",
+    "caption": "« De la force, de l’amour et beaucoup de rose. 🌸»",
+    "featuredProduct": "—",
+    "cta": "—",
+    "status": "approved",
+    "creativeBrief": "Post texte natif sur fond rose Facebook",
+    "mediaUrls": [],
+    "orderIndex": 1
+  },
+  {
+    "id": "fruithe-oct-2",
+    "workspaceId": "fruithe",
+    "week": "S1",
+    "scheduledDate": "2026-10-07",
+    "dayOfWeek": "Mer.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Produit / Découverte",
+    "format": "image",
+    "theme": "Combo #1 : La pause douceur d’Octobre",
+    "caption": "laissez-vous tenter par le mariage parfait entre la fraise gourmande, le matcha authentique et notre sandwich au poulet brioché. 🌸 Disponible à Bonoumin et en livraison via WhatsApp !\n\nAccroche affiche : « La pause douceur d’Octobre. »",
+    "featuredProduct": "Strawberry Matcha (4 000 FCFA) + Sandwich au Poulet (3 000 FCFA)",
+    "cta": "Commander sur WhatsApp",
+    "status": "approved",
+    "creativeBrief": "Affiche photo épurée bi-goût vert matcha et rose fraise avec sandwich brioché",
+    "mediaUrls": [],
+    "orderIndex": 2
+  },
+  {
+    "id": "fruithe-oct-3",
+    "workspaceId": "fruithe",
+    "week": "S1",
+    "scheduledDate": "2026-10-09",
+    "dayOfWeek": "Ven.",
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "facebook"
+    ],
+    "objective": "Humour & Humanisation",
+    "format": "video",
+    "theme": "Le serveur FruiThé : Chaud vs Froid",
+    "caption": "Contenu : Le serveur qui présente l’option chaud vs froid avec la vanne : « Si tu es célibataire, prends chaud pour te réchauffer le cœur ».\n\nLégende : « Team chaud ou Team froid ? Même nos serveurs ont leurs conseils pour vous ce week-end ! 😅 Rendez-vous au spot à Bonoumin pour faire votre choix ! 🧋🤍 »",
+    "featuredProduct": "Bubble Tea Chaud / Froid",
+    "cta": "Venez tester ce week-end !",
+    "status": "approved",
+    "creativeBrief": "Vidéo 1 reçue de la responsable (serveur au bar)",
+    "mediaUrls": [],
+    "orderIndex": 3
+  },
+  {
+    "id": "fruithe-oct-4",
+    "workspaceId": "fruithe",
+    "week": "S1",
+    "scheduledDate": "2026-10-10",
+    "dayOfWeek": "Sam.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Engagement & Découverte",
+    "format": "story",
+    "theme": "Sondage Bubble Tea Chaud & Fraîcheur week-end",
+    "caption": "Contenu : Sondage en story : « Vous saviez qu’on fait des Bubble Teas chauds ? » (Options : Oui direct / Je découvre aujourd’hui) + Sticker WhatsApp (05 96 93 50 50).",
+    "featuredProduct": "—",
+    "cta": "Commander sur WhatsApp",
+    "status": "pending_review",
+    "creativeBrief": "Story interactive avec sticker sondage + photo du bar",
+    "mediaUrls": [],
+    "orderIndex": 4
+  },
+  {
+    "id": "fruithe-oct-5",
+    "workspaceId": "fruithe",
+    "week": "S2",
+    "scheduledDate": "2026-10-12",
+    "dayOfWeek": "Lun.",
+    "platforms": [
+      "facebook"
+    ],
+    "objective": "Motivation & Proximité",
+    "format": "text",
+    "theme": "La force du lundi",
+    "caption": "« On dit souvent que le lundi est difficile, mais avec un bon thé glacé bien dosé dans la main, la semaine commence toujours mieux. Bon lundi les FruiThés ! 🤍🧋 »",
+    "featuredProduct": "",
+    "cta": "—",
+    "status": "approved",
+    "creativeBrief": "Post texte natif sur fond coloré Facebook",
+    "mediaUrls": [],
+    "orderIndex": 5
+  },
+  {
+    "id": "fruithe-oct-6",
+    "workspaceId": "fruithe",
+    "week": "S2",
+    "scheduledDate": "2026-10-14",
+    "dayOfWeek": "Mer.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Produit & Local 225",
+    "format": "image",
+    "theme": "Combo #2 : Le BBL rencontre le Côcôta",
+    "caption": "Quand le street-food ivoirien passe en mode premium : notre mythique Burger Baoulé Legacy accompagné de la fraîcheur acidulée du Côcôta local. Ça, c’est le déjeuner qui met tout le monde d’accord à Abidjan ! 🤤\n\nAccroche affiche : « Le BBL rencontre le Côcôta. Le combo 100% 225. 🇨🇮🔥 »",
+    "featuredProduct": "Côcôta Glacé ou Maad Fusion (3 000 FCFA) + Burger Baoulé Legacy (BBL) + Frites (Panini d’Abidjan — 4 500 FCFA)",
+    "cta": "Commander au 05 96 93 50 50",
+    "status": "pending_review",
+    "creativeBrief": "Affiche combo street-food chic 100% ivoirien (BBL + Côcôta)",
+    "mediaUrls": [],
+    "orderIndex": 6
+  },
+  {
+    "id": "fruithe-oct-7",
+    "workspaceId": "fruithe",
+    "week": "S2",
+    "scheduledDate": "2026-10-16",
+    "dayOfWeek": "Ven.",
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "facebook"
+    ],
+    "objective": "Produit & Célébration Week-end",
+    "format": "video",
+    "theme": "Nuage de Ube : Recharge mon énergie",
+    "caption": "Contenu : Boisson Nuage de Ube avec la mention incrustée « Recharge mon énergie ».\n\nLégende réorientée week-end : « Le week-end est enfin là ! 🥳 On coupe avec le stress de la semaine et on passe en mode détente avec un Nuage de Ube bien onctueux. 💜 Venez recharger les batteries au spot à Bonoumin ou commandez sur Yango ! »",
+    "featuredProduct": "Nuage de Ube (4 000 FCFA)",
+    "cta": "Dispo à Bonoumin et Yango",
+    "status": "approved",
+    "creativeBrief": "Vidéo 2 reçue de la responsable (Nuage de Ube)",
+    "mediaUrls": [],
+    "orderIndex": 7
+  },
+  {
+    "id": "fruithe-oct-8",
+    "workspaceId": "fruithe",
+    "week": "S2",
+    "scheduledDate": "2026-10-17",
+    "dayOfWeek": "Sam.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Engagement & Découverte locale",
+    "format": "story",
+    "theme": "Team Côcôta ou Team Maad ?",
+    "caption": "Contenu : Boîte à questions / Sondage : « Pour votre samedi : plutôt team Côcôta ou team Maad sucré ? »",
+    "featuredProduct": "Côcôta Glacé / Maad Fusion",
+    "cta": "Dites-nous en story !",
+    "status": "pending_review",
+    "creativeBrief": "Story interactive avec stickers sondage",
+    "mediaUrls": [],
+    "orderIndex": 8
+  },
+  {
+    "id": "fruithe-oct-9",
+    "workspaceId": "fruithe",
+    "week": "S3",
+    "scheduledDate": "2026-10-19",
+    "dayOfWeek": "Lun.",
+    "platforms": [
+      "facebook"
+    ],
+    "objective": "Expérience Client & Accueil",
+    "format": "text",
+    "theme": "Le refuge de Bonoumin",
+    "caption": "Il fait trop chaud en ce moment, venez vous poser au calme et respirer chez FruiThé. La clim et la bonne humeur sont déjà prêtes pour vous...En plus il y a wi-fi gratuit 😌✨ »",
+    "featuredProduct": "—",
+    "cta": "—",
+    "status": "approved",
+    "creativeBrief": "Post texte natif sur fond coloré Facebook",
+    "mediaUrls": [],
+    "orderIndex": 9
+  },
+  {
+    "id": "fruithe-oct-10",
+    "workspaceId": "fruithe",
+    "week": "S3",
+    "scheduledDate": "2026-10-23",
+    "dayOfWeek": "Ven.",
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "facebook"
+    ],
+    "objective": "Expérience Client & Ambiance",
+    "format": "video",
+    "theme": "Une Journée FruiThé à Bonoumin",
+    "caption": "Contenu : Plans du restaurant à Bonoumin, préparation des boissons, client qui récupère sa commande avec le sourire, salle en bois cosy.\n\nLégende : « Une journée ordinaire chez FruiThé. C’est pas restaurant 5 étoiles qui est là ? 😌 Passez nous voir ce week-end en face d’Abidjan Mall ! 🤍✨ »",
+    "featuredProduct": "Carte FruiThé",
+    "cta": "Rendez-vous à Bonoumin !",
+    "status": "pending_review",
+    "creativeBrief": "Vidéo 3 reçue de la responsable (immersion restaurant)",
+    "mediaUrls": [],
+    "orderIndex": 10
+  },
+  {
+    "id": "fruithe-oct-11",
+    "workspaceId": "fruithe",
+    "week": "S3",
+    "scheduledDate": "2026-10-21",
+    "dayOfWeek": "Mer.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Produit & Confort",
+    "format": "image",
+    "theme": "Combo #3 : Pour ceux qui aiment les vraies choses",
+    "caption": "La douceur fruitée de l’Aurore d’Abidjan alliée au croustillant de notre Loaded Alloco nappé de sauce fromage… C’est la pause réconfortante que vous méritez cette semaine. 🍌🧀\n\nAccroche affiche : « Pour ceux qui aiment les vraies choses. »",
+    "featuredProduct": "Aurore d’Abidjan (4 000 FCFA) + Loaded Alloco (8 500 FCFA)",
+    "cta": "Réserver / Commander",
+    "status": "pending_review",
+    "creativeBrief": "Affiche photo Loaded Alloco & boisson cheese",
+    "mediaUrls": [],
+    "orderIndex": 11
+  },
+  {
+    "id": "fruithe-oct-12",
+    "workspaceId": "fruithe",
+    "week": "S3",
+    "scheduledDate": "2026-10-24",
+    "dayOfWeek": "Sam.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Communauté & Preuve Sociale",
+    "format": "story",
+    "theme": "Vos sourires à Bonoumin",
+    "caption": "Contenu : Repartage des plus belles stories taguées par les clients dans la semaine avec mention : « Merci d’illuminer notre salle chaque week-end ✨ ».",
+    "featuredProduct": "—",
+    "cta": "Taguez-nous en story !",
+    "status": "pending_review",
+    "creativeBrief": "Repartages UGC clients au restaurant",
+    "mediaUrls": [],
+    "orderIndex": 12
+  },
+  {
+    "id": "fruithe-oct-13",
+    "workspaceId": "fruithe",
+    "week": "S4",
+    "scheduledDate": "2026-10-26",
+    "dayOfWeek": "Lun.",
+    "platforms": [
+      "facebook"
+    ],
+    "objective": "Histoire de marque & Gratitude",
+    "format": "text",
+    "theme": "Là où tout a commencé",
+    "caption": "« Si vous saviez à quel point FruiThé a grandi grâce à vous… Merci pour toute la force et l’amour que vous nous donnez depuis le premier jour. 🤍✨ »",
+    "featuredProduct": "—",
+    "cta": "—",
+    "status": "pending_review",
+    "creativeBrief": "Post texte natif sur fond coloré Facebook",
+    "mediaUrls": [],
+    "orderIndex": 13
+  },
+  {
+    "id": "fruithe-oct-14",
+    "workspaceId": "fruithe",
+    "week": "S4",
+    "scheduledDate": "2026-10-28",
+    "dayOfWeek": "Mer.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Produit & Héritage",
+    "format": "image",
+    "theme": "Combo #4 : Le classique indétrônable",
+    "caption": "Le Brown Sugar authentique et notre Crousty Rice généreux : les saveurs iconiques qui ont fait la réputation de FruiThé depuis nos débuts. Le combo parfait pour les vrais connaisseurs. 🧋🍗\n\nAccroche affiche : « Le classique indétrônable. »",
+    "featuredProduct": "Brown Sugar (5 000 FCFA) + Crousty Rice (7 000 FCFA)",
+    "cta": "Disponible en restaurant & livraison",
+    "status": "pending_review",
+    "creativeBrief": "Affiche iconique Brown Sugar & Crousty Rice",
+    "mediaUrls": [],
+    "orderIndex": 14
+  },
+  {
+    "id": "fruithe-oct-15",
+    "workspaceId": "fruithe",
+    "week": "S4",
+    "scheduledDate": "2026-10-30",
+    "dayOfWeek": "Ven.",
+    "platforms": [
+      "tiktok",
+      "instagram",
+      "facebook"
+    ],
+    "objective": "Jeu-Concours & Teasing Décembre",
+    "format": "video",
+    "theme": "Lancement officiel : « Défends ton FruiThé » avec Samira",
+    "caption": "Contenu : Samira & moi lançons la nouvelle émission officielle du restaurant façon « Défends tes 50 000 » : micro en main, assis Face Cam ; et on explique les règles.\n\nAppel aux Candidatures : Samira invite toute la communauté à postuler via le lien en bio pour participer aux prochains épisodes !\n\nTouche Teasing Mystère : Elle conclut avec un sourire : « Révisez bien votre carte et l’histoire de FruiThé… parce qu’en décembre pour le grand mois anniversaire, les récompenses vont être multipliées par deux ! »\n\nLégende complète : « NOUVEAU CONCEPT chez FruiThé ! 🎤 Tu connais vraiment notre carte sur le bout des doigts ? Viens défendre ta boisson avec Samira ! Pour participer et passer dans le prochain épisode, clique sur le lien en bio et remplis le mini-formulaire. Qui sera le prochain(e) à relever le défi ? 👀👇 »",
+    "featuredProduct": "Boissons & Toppings à gagner",
+    "cta": "Postuler via le lien en bio",
+    "status": "pending_review",
+    "creativeBrief": "Tournage Face Cam avec Samira & CM à Bonoumin",
+    "mediaUrls": [],
+    "orderIndex": 15
+  },
+  {
+    "id": "fruithe-oct-16",
+    "workspaceId": "fruithe",
+    "week": "S4",
+    "scheduledDate": "2026-10-31",
+    "dayOfWeek": "Sam.",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "objective": "Engagement & Quiz",
+    "format": "story",
+    "theme": "Le Quiz « Défends ton FruiThé »",
+    "caption": "Contenu : Sticker Quiz en story reprenant la question de Samira de la veille : « Qui veut participer ? »\n\nLien Story Direct : Sticker Lien menant vers la landing page : « Clique ici pour t’inscrire et participer au prochain tournage avec Samira ! 🎤🧋 »",
+    "featuredProduct": "—",
+    "cta": "Lien inscription tournage",
+    "status": "pending_review",
+    "creativeBrief": "Story quiz interactive + sticker lien",
+    "mediaUrls": [],
+    "orderIndex": 16
+  }
+]
