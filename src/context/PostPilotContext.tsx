@@ -32,6 +32,7 @@ interface PostPilotContextType {
   theme: 'dark' | 'light';
   toggleTheme: () => void;
   resetToOfficialOctoberCalendar: () => void;
+  reschedulePost: (postId: string, newDate: string) => void;
 }
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
@@ -195,6 +196,44 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const reschedulePost = (postId: string, newDateStr: string) => {
+    let targetPost: Post | null = null;
+    const [year, month, day] = newDateStr.split('-').map(Number);
+    const dateObj = new Date(year, month - 1, day);
+    const daysShort = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
+    const dayOfWeek = daysShort[dateObj.getDay()];
+
+    const dayNum = day;
+    let week = 'S1';
+    if (dayNum <= 11) week = 'S1';
+    else if (dayNum <= 18) week = 'S2';
+    else if (dayNum <= 25) week = 'S3';
+    else week = 'S4';
+
+    const updated = posts.map(p => {
+      if (p.id === postId) {
+        const item: Post = {
+          ...p,
+          scheduledDate: newDateStr,
+          dayOfWeek,
+          week,
+          updatedAt: new Date().toISOString(),
+        };
+        targetPost = item;
+        return item;
+      }
+      return p;
+    });
+
+    savePosts(updated);
+    if (targetPost) {
+      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+    }
+    if (selectedPost && selectedPost.id === postId && targetPost) {
+      setSelectedPost(targetPost);
+    }
+  };
+
   const importPosts = (newPosts: Post[]) => {
     const existingIds = new Set(posts.map(p => p.id));
     const merged = [...posts];
@@ -318,6 +357,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         theme,
         toggleTheme,
         resetToOfficialOctoberCalendar,
+        reschedulePost,
       }}
     >
       {children}
