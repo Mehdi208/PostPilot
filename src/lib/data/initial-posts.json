@@ -47,9 +47,9 @@
     "scheduledDate": "2026-10-09",
     "dayOfWeek": "Ven.",
     "platforms": [
-      "tiktok",
+      "facebook",
       "instagram",
-      "facebook"
+      "tiktok"
     ],
     "objective": "Humour & Humanisation",
     "format": "video",
@@ -96,7 +96,7 @@
     "format": "text",
     "theme": "La force du lundi",
     "caption": "« On dit souvent que le lundi est difficile, mais avec un bon thé glacé bien dosé dans la main, la semaine commence toujours mieux. Bon lundi les FruiThés ! 🤍🧋 »",
-    "featuredProduct": "",
+    "featuredProduct": "—",
     "cta": "—",
     "status": "approved",
     "creativeBrief": "Post texte natif sur fond coloré Facebook",
@@ -131,9 +131,9 @@
     "scheduledDate": "2026-10-16",
     "dayOfWeek": "Ven.",
     "platforms": [
-      "tiktok",
+      "facebook",
       "instagram",
-      "facebook"
+      "tiktok"
     ],
     "objective": "Produit & Célébration Week-end",
     "format": "video",
@@ -194,9 +194,9 @@
     "scheduledDate": "2026-10-23",
     "dayOfWeek": "Ven.",
     "platforms": [
-      "tiktok",
+      "facebook",
       "instagram",
-      "facebook"
+      "tiktok"
     ],
     "objective": "Expérience Client & Ambiance",
     "format": "video",
@@ -205,7 +205,7 @@
     "featuredProduct": "Carte FruiThé",
     "cta": "Rendez-vous à Bonoumin !",
     "status": "pending_review",
-    "creativeBrief": "Vidéo 3 reçue de la responsable (immersion restaurant)",
+    "creativeBrief": "Vidéo 3 reçue de la responsable (immersion restaurant)\n[Note de révision] : remplacer par le post du mercredi et poster en stories d'anciennes vidéos,photos ou affiches avec des boissons ",
     "mediaUrls": [],
     "orderIndex": 10
   },
@@ -226,7 +226,7 @@
     "featuredProduct": "Aurore d’Abidjan (4 000 FCFA) + Loaded Alloco (8 500 FCFA)",
     "cta": "Réserver / Commander",
     "status": "pending_review",
-    "creativeBrief": "Affiche photo Loaded Alloco & boisson cheese",
+    "creativeBrief": "Affiche photo Loaded Alloco & boisson cheese\n[Note de révision] : Remplacer par le post du vendredi : Immersion restaurant",
     "mediaUrls": [],
     "orderIndex": 11
   },
@@ -247,7 +247,7 @@
     "featuredProduct": "—",
     "cta": "Taguez-nous en story !",
     "status": "pending_review",
-    "creativeBrief": "Repartages UGC clients au restaurant",
+    "creativeBrief": "Repartages UGC clients au restaurant\n[Note de révision] : En plus de la storie, en fin de journée : 18h poster une vidéo drôle. celle avec la cliente qui demande le salaire de la serveuse ",
     "mediaUrls": [],
     "orderIndex": 12
   },
@@ -288,7 +288,7 @@
     "featuredProduct": "Brown Sugar (5 000 FCFA) + Crousty Rice (7 000 FCFA)",
     "cta": "Disponible en restaurant & livraison",
     "status": "pending_review",
-    "creativeBrief": "Affiche iconique Brown Sugar & Crousty Rice",
+    "creativeBrief": "Affiche iconique Brown Sugar & Crousty Rice\n[Note de révision] : Poster en vidéo la compile de tous les vlogs des clients ",
     "mediaUrls": [],
     "orderIndex": 14
   },
@@ -299,9 +299,9 @@
     "scheduledDate": "2026-10-30",
     "dayOfWeek": "Ven.",
     "platforms": [
-      "tiktok",
+      "facebook",
       "instagram",
-      "facebook"
+      "tiktok"
     ],
     "objective": "Jeu-Concours & Teasing Décembre",
     "format": "video",
@@ -331,7 +331,7 @@
     "featuredProduct": "—",
     "cta": "Lien inscription tournage",
     "status": "pending_review",
-    "creativeBrief": "Story quiz interactive + sticker lien",
+    "creativeBrief": "Story quiz interactive + sticker lien\n[Note de révision] : Poster une vidéo en fin de journée ",
     "mediaUrls": [],
     "orderIndex": 16
   }

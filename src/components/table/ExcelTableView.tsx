@@ -4,10 +4,10 @@ import React from 'react';
 import { usePostPilot } from '@/context/PostPilotContext';
 import { Post, PostStatus } from '@/types/post';
 import { getStatusBadge, getPlatformBadge } from '@/lib/utils';
-import { Edit3 } from 'lucide-react';
+import { Edit3, RotateCcw } from 'lucide-react';
 
 export default function ExcelTableView() {
-  const { filteredPosts, setSelectedPost, updatePostStatus, activeWorkspace } = usePostPilot();
+  const { filteredPosts, setSelectedPost, updatePostStatus, activeWorkspace, resetToOfficialOctoberCalendar } = usePostPilot();
 
   const handleStatusCycle = (e: React.MouseEvent, post: Post) => {
     e.stopPropagation();
@@ -39,8 +39,18 @@ export default function ExcelTableView() {
           </p>
         </div>
 
-        <div className="text-xs font-mono text-zinc-500">
-          {filteredPosts.length} publications
+        <div className="flex items-center gap-3">
+          <div className="text-xs font-mono text-zinc-500">
+            {filteredPosts.length} publications
+          </div>
+          <button
+            onClick={resetToOfficialOctoberCalendar}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 text-zinc-800 dark:text-zinc-200 text-xs font-medium transition-all active:scale-[0.98]"
+            title="Recharger les 16 publications officielles d'Octobre 2026"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
+            <span>Recharger Octobre 2026</span>
+          </button>
         </div>
       </div>
 

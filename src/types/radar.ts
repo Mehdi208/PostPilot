@@ -1,38 +1,33 @@
-export type RadarCategory = 
-  | 'demonstration' 
-  | 'situation' 
-  | 'avis' 
-  | 'coulisses';
+export type RadarNiche = 'bubble_tea' | 'cafe' | 'restaurant';
 
 export interface ViralOutlierVideo {
   id: string;
   workspaceId: string;
   competitorName: string;
   competitorHandle: string;
-  competitorAvatar: string;
-  category: RadarCategory;
+  competitorAvatar?: string;
+  location?: string;
+  category: RadarNiche | string;
   categoryLabel: string;
   platform: 'instagram' | 'tiktok';
   
-  // URL de redirection directe vers la vidéo réelle
+  // URL de redirection directe vers la publication réelle
   videoUrl: string;
   
   // Visuel et durée
   videoThumbnail: string;
-  duration: string;
+  duration?: string;
   
-  // Métriques d'audience
-  viewsCount: number;
-  viewsFormatted: string;
-  accountMedianViews: number;
-  outlierMultiplier: number;
+  // Période temporelle
+  timeframe: '24h' | '48h' | '7d';
   timeAgo: string;
   crawledAt: string;
   
-  // Analyse de performance
+  // Contenu & Analyse
   hookText: string;
-  whyItPerformed: string;
-  structureNote: string;
+  postCaption?: string;
+  whyItPerformed?: string;
+  structureNote?: string;
   audioTrack?: string;
   
   // Déclinaison éditoriale recommandée
@@ -42,7 +37,5 @@ export interface ViralOutlierVideo {
 
 export interface RadarFilterState {
   timeframe: 'all' | '24h' | '48h' | '7d';
-  category: 'all' | RadarCategory;
-  platform: 'all' | 'instagram' | 'tiktok';
-  minMultiplier: 'all' | '5x' | '8x';
+  category: 'all' | RadarNiche | string;
 }

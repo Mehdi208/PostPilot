@@ -19,7 +19,7 @@ import {
   Layers 
 } from 'lucide-react';
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v1';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v2';
 const STORAGE_KEY_THEME = 'postpilot_theme';
 
 export default function ClientPreviewPage() {

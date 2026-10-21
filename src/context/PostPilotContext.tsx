@@ -31,11 +31,12 @@ interface PostPilotContextType {
   dispatchToMakeWebhook: (post: Post) => Promise<{ success: boolean; message: string }>;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
+  resetToOfficialOctoberCalendar: () => void;
 }
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v1';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v2';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 export function PostPilotProvider({ children }: { children: React.ReactNode }) {
@@ -133,6 +134,18 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     setPosts(newPosts);
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(newPosts));
+    }
+  };
+
+  const resetToOfficialOctoberCalendar = () => {
+    const mappedInitial = (initialPostsData as unknown as Post[]).map(p => ({
+      ...p,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }));
+    setPosts(mappedInitial);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(mappedInitial));
     }
   };
 
@@ -304,6 +317,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         dispatchToMakeWebhook,
         theme,
         toggleTheme,
+        resetToOfficialOctoberCalendar,
       }}
     >
       {children}
