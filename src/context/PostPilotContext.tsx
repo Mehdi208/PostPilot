@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Post, PostStatus, Platform } from '@/types/post';
 import { Workspace, DEFAULT_WORKSPACES } from '@/types/workspace';
 import initialPostsData from '@/lib/data/initial-posts.json';
-import { syncPostToFirestore, subscribeToWorkspacePosts } from '@/lib/firebase/firestore';
+import { syncPostToFirestore, subscribeToWorkspacePosts, batchSavePostsToFirestore } from '@/lib/firebase/firestore';
 
 interface PostPilotContextType {
   workspaces: Workspace[];
@@ -37,8 +37,46 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v2';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v4';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
+
+// Renvoie les 16 publications officielles d'Octobre 2026 de FruiThé
+function getInitialOctoberPosts(): Post[] {
+  return (initialPostsData as unknown as Post[]).map(p => ({
+    ...p,
+    createdAt: p.createdAt || new Date().toISOString(),
+    updatedAt: p.updatedAt || new Date().toISOString(),
+  }));
+}
+
+// Fusion auto-réparatrice : garantit que les 16 publications sont toujours présentes,
+// tout en conservant les modifications (déplacements de dates, changements de statut, feedbacks client).
+function mergeWithInitialPosts(savedList: Post[]): Post[] {
+  const basePosts = getInitialOctoberPosts();
+  const map = new Map<string, Post>();
+
+  // 1. Initialise avec les 16 posts officiels
+  basePosts.forEach(p => map.set(p.id, p));
+
+  // 2. Superpose les modifications sauvegardées sans rien supprimer
+  if (Array.isArray(savedList)) {
+    savedList.forEach(sp => {
+      if (sp && sp.id) {
+        if (map.has(sp.id)) {
+          map.set(sp.id, {
+            ...map.get(sp.id)!,
+            ...sp,
+          });
+        } else {
+          // Nouveaux posts créés manuellement par l'utilisateur
+          map.set(sp.id, sp);
+        }
+      }
+    });
+  }
+
+  return Array.from(map.values()).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+}
 
 export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   const [workspaces] = useState<Workspace[]>(DEFAULT_WORKSPACES);
@@ -83,7 +121,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Initialisation des posts depuis le localStorage ou le JSON initial
+  // Initialisation auto-réparatrice des posts (récupère v4 ou migre v3/v2/v1 sans perte)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedWorkspaceId = localStorage.getItem(STORAGE_KEY_WORKSPACE);
@@ -92,62 +130,72 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         if (found) setActiveWorkspaceState(found);
       }
 
-      const savedPosts = localStorage.getItem(STORAGE_KEY_POSTS);
-      if (savedPosts) {
+      // Lecture v4 ou versions antérieures
+      const rawStored = 
+        localStorage.getItem(STORAGE_KEY_POSTS) || 
+        localStorage.getItem('postpilot_posts_v3') || 
+        localStorage.getItem('postpilot_posts_v2') || 
+        localStorage.getItem('postpilot_posts_v1');
+
+      let parsed: Post[] = [];
+      if (rawStored) {
         try {
-          const parsed = JSON.parse(savedPosts);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setPosts(parsed);
-            return;
-          }
+          const json = JSON.parse(rawStored);
+          if (Array.isArray(json)) parsed = json;
         } catch {
-          // Fallback sur initialPostsData
+          // ignore
         }
       }
 
-      // Charge les 16 posts réels d'Octobre 2026 de FruiThé
-      const mappedInitial = (initialPostsData as unknown as Post[]).map(p => ({
-        ...p,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      }));
-      setPosts(mappedInitial);
-      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(mappedInitial));
+      // Auto-réparation immédiate : garantit l'intégralité des 16 posts
+      const healed = mergeWithInitialPosts(parsed);
+      setPosts(healed);
+      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
+
+      // Batch save vers Firestore pour peupler la collection si vide
+      batchSavePostsToFirestore(DEFAULT_WORKSPACES[0].id, healed).catch(() => {});
     }
   }, []);
 
-  // Écouteur temps réel Firestore (si clés réelles configurées)
+  // Écouteur temps réel Firestore NON-DESTRUCTIF
   useEffect(() => {
     const unsubscribe = subscribeToWorkspacePosts(activeWorkspace.id, (firestorePosts) => {
       if (firestorePosts && firestorePosts.length > 0) {
-        setPosts(firestorePosts);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(firestorePosts));
-        }
+        setPosts(currentPosts => {
+          // Base : les posts actuels ou les 16 posts de référence
+          const base = currentPosts.length >= 16 ? currentPosts : mergeWithInitialPosts(currentPosts);
+          const map = new Map<string, Post>();
+          base.forEach(p => map.set(p.id, p));
+
+          // Fusionne les documents Firestore par ID sans effacer les autres posts
+          firestorePosts.forEach(fp => {
+            if (fp && fp.id) {
+              map.set(fp.id, {
+                ...(map.get(fp.id) || fp),
+                ...fp,
+              });
+            }
+          });
+
+          const merged = Array.from(map.values()).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0));
+          if (typeof window !== 'undefined') {
+            localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(merged));
+          }
+          return merged;
+        });
       }
     });
 
     return () => unsubscribe();
   }, [activeWorkspace.id]);
 
-  // Sauvegarde automatique des posts dans le localStorage et sync Firestore
-  const savePosts = (newPosts: Post[]) => {
-    setPosts(newPosts);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(newPosts));
-    }
-  };
-
   const resetToOfficialOctoberCalendar = () => {
-    const mappedInitial = (initialPostsData as unknown as Post[]).map(p => ({
-      ...p,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    }));
-    setPosts(mappedInitial);
+    const official = getInitialOctoberPosts();
+    setPosts(official);
     if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(mappedInitial));
+      localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(official));
     }
+    batchSavePostsToFirestore(activeWorkspace.id, official).catch(() => {});
   };
 
   const setActiveWorkspace = (workspace: Workspace) => {
@@ -159,37 +207,52 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
 
   const updatePostStatus = (postId: string, status: PostStatus) => {
     let targetPost: Post | null = null;
-    const updated = posts.map(p => {
-      if (p.id === postId) {
-        const updatedItem = {
-          ...p,
-          status,
-          updatedAt: new Date().toISOString(),
-        };
-        targetPost = updatedItem;
-        return updatedItem;
+    setPosts(prevPosts => {
+      const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
+      const updated = base.map(p => {
+        if (p.id === postId) {
+          const updatedItem = {
+            ...p,
+            status,
+            updatedAt: new Date().toISOString(),
+          };
+          targetPost = updatedItem;
+          return updatedItem;
+        }
+        return p;
+      });
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
       }
-      return p;
+      return updated;
     });
 
-    savePosts(updated);
-
-    if (targetPost) {
-      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
-    }
+    setTimeout(() => {
+      if (targetPost) {
+        syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+      }
+    }, 0);
 
     if (selectedPost && selectedPost.id === postId) {
-      setSelectedPost({
-        ...selectedPost,
+      setSelectedPost(prev => prev ? {
+        ...prev,
         status,
         updatedAt: new Date().toISOString(),
-      });
+      } : null);
     }
   };
 
   const updatePost = (updatedPost: Post) => {
-    const updated = posts.map(p => (p.id === updatedPost.id ? updatedPost : p));
-    savePosts(updated);
+    setPosts(prevPosts => {
+      const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
+      const updated = base.map(p => (p.id === updatedPost.id ? updatedPost : p));
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
+      }
+      return updated;
+    });
+
     syncPostToFirestore(activeWorkspace.id, updatedPost).catch(() => {});
     if (selectedPost && selectedPost.id === updatedPost.id) {
       setSelectedPost(updatedPost);
@@ -210,68 +273,99 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     else if (dayNum <= 25) week = 'S3';
     else week = 'S4';
 
-    const updated = posts.map(p => {
-      if (p.id === postId) {
-        const item: Post = {
-          ...p,
-          scheduledDate: newDateStr,
-          dayOfWeek,
-          week,
-          updatedAt: new Date().toISOString(),
-        };
-        targetPost = item;
-        return item;
+    setPosts(prevPosts => {
+      const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
+      const updated = base.map(p => {
+        if (p.id === postId) {
+          const item: Post = {
+            ...p,
+            scheduledDate: newDateStr,
+            dayOfWeek,
+            week,
+            updatedAt: new Date().toISOString(),
+          };
+          targetPost = item;
+          return item;
+        }
+        return p;
+      });
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
       }
-      return p;
+      return updated;
     });
 
-    savePosts(updated);
-    if (targetPost) {
-      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
-    }
-    if (selectedPost && selectedPost.id === postId && targetPost) {
-      setSelectedPost(targetPost);
+    setTimeout(() => {
+      if (targetPost) {
+        syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+      }
+    }, 0);
+
+    if (selectedPost && selectedPost.id === postId) {
+      setSelectedPost(prev => prev ? {
+        ...prev,
+        scheduledDate: newDateStr,
+        dayOfWeek,
+        week,
+        updatedAt: new Date().toISOString(),
+      } : null);
     }
   };
 
   const importPosts = (newPosts: Post[]) => {
-    const existingIds = new Set(posts.map(p => p.id));
-    const merged = [...posts];
-    for (const np of newPosts) {
-      if (existingIds.has(np.id)) {
-        const index = merged.findIndex(p => p.id === np.id);
-        merged[index] = np;
-      } else {
-        merged.push(np);
+    setPosts(prevPosts => {
+      const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
+      const existingIds = new Set(base.map(p => p.id));
+      const merged = [...base];
+      for (const np of newPosts) {
+        if (existingIds.has(np.id)) {
+          const index = merged.findIndex(p => p.id === np.id);
+          merged[index] = np;
+        } else {
+          merged.push(np);
+        }
       }
-    }
-    savePosts(merged);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(merged));
+      }
+      return merged;
+    });
   };
 
   const addPostFeedback = (postId: string, comment: string, approved: boolean) => {
     let targetPost: Post | null = null;
-    const updated = posts.map(p => {
-      if (p.id === postId) {
-        const item = {
-          ...p,
-          status: (approved ? 'approved' : 'changes_requested') as PostStatus,
-          clientFeedback: {
-            approved,
-            comment,
+    setPosts(prevPosts => {
+      const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
+      const updated = base.map(p => {
+        if (p.id === postId) {
+          const item = {
+            ...p,
+            status: (approved ? 'approved' : 'changes_requested') as PostStatus,
+            clientFeedback: {
+              approved,
+              comment,
+              updatedAt: new Date().toISOString(),
+            },
             updatedAt: new Date().toISOString(),
-          },
-          updatedAt: new Date().toISOString(),
-        };
-        targetPost = item;
-        return item;
+          };
+          targetPost = item;
+          return item;
+        }
+        return p;
+      });
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
       }
-      return p;
+      return updated;
     });
 
-    savePosts(updated);
-    if (targetPost) {
-      syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
-    }
+    setTimeout(() => {
+      if (targetPost) {
+        syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+      }
+    }, 0);
   };
 
   const dispatchToMakeWebhook = async (post: Post): Promise<{ success: boolean; message: string }> => {

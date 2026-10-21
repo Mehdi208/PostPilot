@@ -8,7 +8,8 @@ import {
   Plus, 
   GripVertical, 
   ArrowDown, 
-  Check 
+  Check,
+  RotateCcw
 } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
@@ -22,7 +23,7 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function MonthCalendarView() {
-  const { filteredPosts, setSelectedPost, activeWorkspace, posts, reschedulePost } = usePostPilot();
+  const { filteredPosts, setSelectedPost, activeWorkspace, posts, reschedulePost, resetToOfficialOctoberCalendar } = usePostPilot();
 
   // États pour le Drag & Drop
   const [draggingPostId, setDraggingPostId] = useState<string | null>(null);
@@ -142,7 +143,7 @@ export default function MonthCalendarView() {
           </span>
         </div>
 
-        {/* Center/Right: Sprints & Hint Drag and Drop */}
+        {/* Center/Right: Sprints & Hint Drag and Drop & Reset */}
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-1.5 text-[11px] font-mono text-zinc-500">
             <span className="px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">S1 : 5-11</span>
@@ -151,9 +152,18 @@ export default function MonthCalendarView() {
             <span className="px-1.5 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">S4 : 26-31</span>
           </div>
 
+          <button
+            onClick={resetToOfficialOctoberCalendar}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium text-[11px] transition-all cursor-pointer"
+            title="Réinitialiser l'ensemble du calendrier d'Octobre (16 publications)"
+          >
+            <RotateCcw className="w-3 h-3 text-zinc-500" />
+            <span className="hidden sm:inline">Réinitialiser Octobre</span>
+          </button>
+
           <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-500 bg-white dark:bg-zinc-900 px-2.5 py-1 rounded border border-zinc-200 dark:border-zinc-800">
             <GripVertical className="w-3 h-3 text-zinc-400" />
-            <span>Glisser-déposer les cadres pour changer de date</span>
+            <span>Glisser-déposer pour reprogrammer</span>
           </div>
         </div>
 
