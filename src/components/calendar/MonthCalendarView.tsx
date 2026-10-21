@@ -2,8 +2,8 @@
 
 import React, { useState } from 'react';
 import { usePostPilot } from '@/context/PostPilotContext';
-import { Post } from '@/types/post';
-import { getPlatformBadge } from '@/lib/utils';
+import { Post, PostStatus } from '@/types/post';
+import { getPlatformBadge, getStatusConfig } from '@/lib/utils';
 import { 
   Plus, 
   GripVertical, 
@@ -23,7 +23,25 @@ const DAYS_OF_WEEK = [
 ];
 
 export default function MonthCalendarView() {
-  const { filteredPosts, setSelectedPost, activeWorkspace, posts, reschedulePost, resetToOfficialOctoberCalendar } = usePostPilot();
+  const { filteredPosts, setSelectedPost, activeWorkspace, posts, reschedulePost, updatePostStatus, resetToOfficialOctoberCalendar } = usePostPilot();
+
+  // Cycle rapide de statut en 1 clic directement sur la carte
+  const handleQuickStatusCycle = (e: React.MouseEvent, post: Post) => {
+    e.stopPropagation();
+    const cycle: Record<PostStatus, PostStatus> = {
+      draft: 'pending_review',
+      pending_review: 'approved',
+      approved: 'scheduled',
+      scheduled: 'published',
+      published: 'draft',
+      changes_requested: 'pending_review',
+    };
+    const nextStatus = cycle[post.status] || 'scheduled';
+    updatePostStatus(post.id, nextStatus);
+    const nextConf = getStatusConfig(nextStatus);
+    setToastMessage(`Statut : « ${post.theme.slice(0, 24)} » passé en ${nextConf.label}`);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   // États pour le Drag & Drop
   const [draggingPostId, setDraggingPostId] = useState<string | null>(null);
@@ -306,6 +324,7 @@ export default function MonthCalendarView() {
                 {dayPosts.map((post: Post) => {
                   const isBeingDragged = draggingPostId === post.id;
                   const isJustMoved = justMovedPostId === post.id;
+                  const statusConf = getStatusConfig(post.status);
 
                   return (
                     <div
@@ -322,12 +341,12 @@ export default function MonthCalendarView() {
                         setDragOverDate(null);
                       }}
                       onClick={() => setSelectedPost(post)}
-                      className={`p-2 rounded-md border cursor-grab active:cursor-grabbing transition-all shadow-xs group/card text-left ${
+                      className={`p-2 rounded-md border cursor-grab active:cursor-grabbing transition-all shadow-xs group/card text-left ${statusConf.borderAccent} ${
                         isBeingDragged
                           ? 'opacity-30 scale-95 ring-2 ring-zinc-500 bg-zinc-200 dark:bg-zinc-800'
                           : isJustMoved
                           ? 'ring-2 ring-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30'
-                          : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 hover:border-zinc-400 dark:hover:border-zinc-600'
+                          : `bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 ${statusConf.cardBg}`
                       }`}
                     >
                       {/* Format, Time, Status & Drag Handle */}
@@ -344,24 +363,16 @@ export default function MonthCalendarView() {
                           )}
                         </div>
 
-                        {/* Status Label */}
-                        {post.status === 'approved' ? (
-                          <span className="text-[9px] font-mono font-medium px-1.5 py-0.2 rounded bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-200 border border-zinc-300 dark:border-zinc-700">
-                            Validé
-                          </span>
-                        ) : post.status === 'pending_review' ? (
-                          <span className="text-[9px] font-mono text-zinc-500">
-                            Attente
-                          </span>
-                        ) : post.status === 'changes_requested' ? (
-                          <span className="text-[9px] font-mono text-zinc-900 dark:text-zinc-100 font-bold underline">
-                            Retouche
-                          </span>
-                        ) : (
-                          <span className="text-[9px] font-mono text-zinc-400">
-                            Brouillon
-                          </span>
-                        )}
+                        {/* Status Label (Coloré & Interactif) */}
+                        <button
+                          type="button"
+                          onClick={(e) => handleQuickStatusCycle(e, post)}
+                          title={`Statut : ${statusConf.label}. Cliquer pour passer au statut suivant.`}
+                          className={`inline-flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border transition-all cursor-pointer hover:opacity-85 active:scale-95 ${statusConf.badgeClass}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusConf.dotClass}`} />
+                          <span>{statusConf.shortLabel}</span>
+                        </button>
                       </div>
 
                       {/* Title */}

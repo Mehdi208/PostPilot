@@ -253,7 +253,7 @@ export default function AppTopbar() {
             {/* Status Filter */}
             <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
               <span className="text-[10px] uppercase font-mono text-zinc-400 px-2 font-medium">Statut :</span>
-              {(['all', 'approved', 'pending_review', 'changes_requested', 'draft'] as const).map((st) => (
+              {(['all', 'scheduled', 'approved', 'pending_review', 'changes_requested', 'draft'] as const).map((st) => (
                 <button
                   key={st}
                   onClick={() => setSelectedStatus(st)}
@@ -263,7 +263,7 @@ export default function AppTopbar() {
                       : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                   }`}
                 >
-                  {st === 'all' ? 'Tous' : st === 'approved' ? 'Validé' : st === 'pending_review' ? 'En attente' : st === 'changes_requested' ? 'Retouche' : 'Brouillon'}
+                  {st === 'all' ? 'Tous' : st === 'scheduled' ? 'Programmé' : st === 'approved' ? 'Validé' : st === 'pending_review' ? 'En attente' : st === 'changes_requested' ? 'Retouche' : 'Brouillon'}
                 </button>
               ))}
             </div>

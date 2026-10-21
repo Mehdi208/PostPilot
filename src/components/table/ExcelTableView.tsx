@@ -14,12 +14,12 @@ export default function ExcelTableView() {
     const cycle: Record<PostStatus, PostStatus> = {
       draft: 'pending_review',
       pending_review: 'approved',
-      approved: 'published',
+      approved: 'scheduled',
+      scheduled: 'published',
       published: 'draft',
       changes_requested: 'pending_review',
-      scheduled: 'published',
     };
-    updatePostStatus(post.id, cycle[post.status] || 'pending_review');
+    updatePostStatus(post.id, cycle[post.status] || 'scheduled');
   };
 
   return (
@@ -156,9 +156,10 @@ export default function ExcelTableView() {
                       <button
                         onClick={(e) => handleStatusCycle(e, post)}
                         title="Faire progresser le statut"
-                        className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono border border-zinc-300 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all cursor-pointer font-medium"
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono border transition-all cursor-pointer font-medium hover:scale-105 active:scale-95 ${statusBadge.color}`}
                       >
-                        {statusBadge.label}
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
+                        <span>{statusBadge.label}</span>
                       </button>
                     </td>
 

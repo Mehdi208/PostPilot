@@ -253,10 +253,9 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       return updated;
     });
 
-    syncPostToFirestore(activeWorkspace.id, updatedPost).catch(() => {});
-    if (selectedPost && selectedPost.id === updatedPost.id) {
-      setSelectedPost(updatedPost);
-    }
+    setTimeout(() => {
+      syncPostToFirestore(activeWorkspace.id, updatedPost).catch(() => {});
+    }, 0);
   };
 
   const reschedulePost = (postId: string, newDateStr: string) => {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePostPilot } from '@/context/PostPilotContext';
 import { Post, PostStatus } from '@/types/post';
-import { getStatusBadge } from '@/lib/utils';
+import { getStatusBadge, getStatusConfig } from '@/lib/utils';
 import { uploadPostMedia } from '@/lib/firebase/storage';
 import { 
   X, 
@@ -13,8 +13,18 @@ import {
   Smartphone, 
   Radio, 
   Loader2,
-  Wand2
+  Wand2,
+  Check
 } from 'lucide-react';
+
+const STATUS_OPTIONS: { value: PostStatus; label: string }[] = [
+  { value: 'draft', label: 'Brouillon' },
+  { value: 'pending_review', label: 'En attente' },
+  { value: 'changes_requested', label: 'Retouche demandée' },
+  { value: 'approved', label: 'Validé par le client' },
+  { value: 'scheduled', label: 'Programmé' },
+  { value: 'published', label: 'Publié en ligne' },
+];
 
 export default function PostDetailModal() {
   const { 
@@ -134,8 +144,8 @@ export default function PostDetailModal() {
   const statusBadge = getStatusBadge(formData.status);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-[#0d0e12] border border-zinc-200 dark:border-zinc-800 rounded-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-100 text-zinc-900 dark:text-zinc-100">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/75 flex items-center justify-center p-3 sm:p-4">
+      <div className="bg-white dark:bg-[#0d0e12] border border-zinc-200 dark:border-zinc-800 rounded-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl text-zinc-900 dark:text-zinc-100">
         
         {/* Modal Top Header */}
         <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-950">
@@ -144,10 +154,11 @@ export default function PostDetailModal() {
               {formData.week}
             </span>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 text-sm">{formData.theme}</h3>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300">
-                  {statusBadge.label}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 text-sm max-w-[280px] sm:max-w-md truncate">{formData.theme}</h3>
+                <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border ${statusBadge.color}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
+                  <span>{statusBadge.label}</span>
                 </span>
               </div>
               <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
@@ -450,23 +461,41 @@ export default function PostDetailModal() {
                   />
                 </div>
 
-                {/* Workflow Status Selector */}
+                {/* Workflow Status Selector: Interactive Status Chip Grid */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300 block mb-1">
-                    Statut de la publication
-                  </label>
-                  <select
-                    value={formData.status}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.value as PostStatus })}
-                    className="w-full bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md px-3 py-2 text-xs text-zinc-900 dark:text-zinc-100 focus:outline-none"
-                  >
-                    <option value="draft">Brouillon</option>
-                    <option value="pending_review">En attente de validation client</option>
-                    <option value="changes_requested">Retouche demandée</option>
-                    <option value="approved">Validé par le client</option>
-                    <option value="scheduled">Programmé</option>
-                    <option value="published">Publié</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                      Statut de la publication
+                    </label>
+                    <span className="text-[10px] text-zinc-400 font-mono">
+                      Sélectionnez un état
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    {STATUS_OPTIONS.map((opt) => {
+                      const isSelected = formData.status === opt.value;
+                      const optConf = getStatusConfig(opt.value);
+                      return (
+                        <button
+                          key={opt.value}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, status: opt.value })}
+                          className={`flex items-center gap-2 p-2 rounded-lg border text-xs font-medium transition-all text-left cursor-pointer ${
+                            isSelected
+                              ? `${optConf.badgeClass} ring-2 ring-zinc-950 dark:ring-white shadow-xs`
+                              : 'border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${optConf.dotClass}`} />
+                          <span className="truncate">{opt.label}</span>
+                          {isSelected && (
+                            <Check className="w-3.5 h-3.5 ml-auto shrink-0" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {webhookMsg && (

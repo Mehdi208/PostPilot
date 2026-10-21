@@ -13,46 +13,98 @@ export function formatFCFA(amount: number): string {
   }).format(amount).replace('XOF', 'FCFA');
 }
 
-export function getStatusBadge(status: string) {
+export interface StatusConfig {
+  value: 'draft' | 'pending_review' | 'changes_requested' | 'approved' | 'scheduled' | 'published';
+  label: string;
+  shortLabel: string;
+  badgeClass: string;
+  dotClass: string;
+  borderAccent: string;
+  cardBg: string;
+  iconColor: string;
+}
+
+export function getStatusConfig(status: string): StatusConfig {
   switch (status) {
+    case 'scheduled':
+      return {
+        value: 'scheduled',
+        label: 'Programmé',
+        shortLabel: 'Programmé',
+        badgeClass: 'bg-purple-100 dark:bg-purple-950/70 text-purple-700 dark:text-purple-300 border-purple-300 dark:border-purple-700/80 font-bold',
+        dotClass: 'bg-purple-500 animate-pulse',
+        borderAccent: 'border-l-4 border-l-purple-500',
+        cardBg: 'hover:border-purple-300 dark:hover:border-purple-700',
+        iconColor: 'text-purple-500',
+      };
     case 'approved':
       return {
-        label: 'Validé',
-        color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-        dot: 'bg-emerald-500',
-      };
-    case 'pending_review':
-      return {
-        label: 'En attente client',
-        color: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-        dot: 'bg-amber-500',
-      };
-    case 'changes_requested':
-      return {
-        label: 'Retouche demandée',
-        color: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
-        dot: 'bg-rose-500',
+        value: 'approved',
+        label: 'Validé par le client',
+        shortLabel: 'Validé',
+        badgeClass: 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 border-emerald-300 dark:border-emerald-700/80 font-bold',
+        dotClass: 'bg-emerald-500',
+        borderAccent: 'border-l-4 border-l-emerald-500',
+        cardBg: 'hover:border-emerald-300 dark:hover:border-emerald-700',
+        iconColor: 'text-emerald-500',
       };
     case 'published':
       return {
-        label: 'Publié',
-        color: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-        dot: 'bg-blue-500',
+        value: 'published',
+        label: 'Publié en ligne',
+        shortLabel: 'Publié',
+        badgeClass: 'bg-blue-100 dark:bg-blue-950/70 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700/80 font-bold',
+        dotClass: 'bg-blue-500',
+        borderAccent: 'border-l-4 border-l-blue-500',
+        cardBg: 'hover:border-blue-300 dark:hover:border-blue-700',
+        iconColor: 'text-blue-500',
       };
-    case 'scheduled':
+    case 'pending_review':
       return {
-        label: 'Programmé',
-        color: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-        dot: 'bg-purple-500',
+        value: 'pending_review',
+        label: 'En attente de validation',
+        shortLabel: 'Attente',
+        badgeClass: 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300 border-amber-300 dark:border-amber-700/80 font-bold',
+        dotClass: 'bg-amber-500',
+        borderAccent: 'border-l-4 border-l-amber-500',
+        cardBg: 'hover:border-amber-300 dark:hover:border-amber-700',
+        iconColor: 'text-amber-500',
+      };
+    case 'changes_requested':
+      return {
+        value: 'changes_requested',
+        label: 'Retouche demandée',
+        shortLabel: 'Retouche',
+        badgeClass: 'bg-rose-100 dark:bg-rose-950/70 text-rose-700 dark:text-rose-300 border-rose-300 dark:border-rose-700/80 font-bold',
+        dotClass: 'bg-rose-500',
+        borderAccent: 'border-l-4 border-l-rose-500',
+        cardBg: 'hover:border-rose-300 dark:hover:border-rose-700',
+        iconColor: 'text-rose-500',
       };
     case 'draft':
     default:
       return {
+        value: 'draft',
         label: 'Brouillon',
-        color: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/20',
-        dot: 'bg-zinc-500',
+        shortLabel: 'Brouillon',
+        badgeClass: 'bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border-zinc-200 dark:border-zinc-700 font-medium',
+        dotClass: 'bg-zinc-400',
+        borderAccent: 'border-l-4 border-l-zinc-300 dark:border-l-zinc-700',
+        cardBg: 'hover:border-zinc-400 dark:hover:border-zinc-600',
+        iconColor: 'text-zinc-400',
       };
   }
+}
+
+export function getStatusBadge(status: string) {
+  const conf = getStatusConfig(status);
+  return {
+    label: conf.label,
+    shortLabel: conf.shortLabel,
+    color: conf.badgeClass,
+    dot: conf.dotClass,
+    borderAccent: conf.borderAccent,
+  };
 }
 
 export function getPlatformBadge(platform: string) {
