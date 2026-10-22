@@ -21,13 +21,15 @@ export default function PwaManager() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 1. Register Service Worker
+    // 1. Register Service Worker & Proactively check for updates
     if ('serviceWorker' in navigator && process.env.NODE_ENV !== 'development') {
       window.addEventListener('load', () => {
         navigator.serviceWorker
           .register('/sw.js')
           .then((reg) => {
             console.log('[PostPilot PWA] Service Worker actif, scope:', reg.scope);
+            // Force byte check for SW updates
+            reg.update().catch(() => {});
           })
           .catch((err) => {
             console.warn('[PostPilot PWA] Erreur enregistrement SW:', err);

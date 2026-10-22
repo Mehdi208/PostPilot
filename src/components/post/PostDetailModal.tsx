@@ -14,7 +14,12 @@ import {
   Radio, 
   Loader2,
   Wand2,
-  Check
+  Check,
+  Sparkles,
+  Copy,
+  ExternalLink,
+  Image as ImageIcon,
+  CheckCircle2
 } from 'lucide-react';
 
 const STATUS_OPTIONS: { value: PostStatus; label: string }[] = [
@@ -36,11 +41,12 @@ export default function PostDetailModal() {
   } = usePostPilot();
 
   const [formData, setFormData] = useState<Post | null>(null);
-  const [activeTab, setActiveTab] = useState<'details' | 'preview'>('details');
+  const [activeTab, setActiveTab] = useState<'details' | 'ai_prompts' | 'preview'>('details');
   const [isSendingWebhook, setIsSendingWebhook] = useState(false);
   const [webhookMsg, setWebhookMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [uploadProgress, setUploadProgress] = useState<number | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   // Copilote IA State
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -83,6 +89,14 @@ export default function PostDetailModal() {
       //
     } finally {
       setIsGeneratingAI(false);
+    }
+  };
+
+  const handleCopyAiPrompt = () => {
+    if (formData?.aiVisualPrompt) {
+      navigator.clipboard.writeText(formData.aiVisualPrompt);
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 2500);
     }
   };
 
@@ -144,58 +158,75 @@ export default function PostDetailModal() {
   const statusBadge = getStatusBadge(formData.status);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/75 flex items-center justify-center p-3 sm:p-4">
-      <div className="bg-white dark:bg-[#0d0e12] border border-zinc-200 dark:border-zinc-800 rounded-xl w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden shadow-2xl text-zinc-900 dark:text-zinc-100">
+    <div className="fixed inset-0 z-50 bg-black/60 dark:bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4">
+      <div className="bg-white dark:bg-[#0d0e12] border-t sm:border border-zinc-200 dark:border-zinc-800 rounded-t-2xl sm:rounded-xl w-full max-w-4xl max-h-[94dvh] sm:max-h-[92vh] flex flex-col overflow-hidden shadow-2xl text-zinc-900 dark:text-zinc-100">
         
+        {/* Mobile Grab Handle */}
+        <div className="sm:hidden w-10 h-1 bg-zinc-300 dark:bg-zinc-700 rounded-full mx-auto mt-2" />
+
         {/* Modal Top Header */}
-        <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-950">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold">
+        <div className="p-3 sm:p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-zinc-50 dark:bg-zinc-950">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="font-mono text-xs px-2 py-0.5 rounded border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 font-bold shrink-0">
               {formData.week}
             </span>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 text-sm max-w-[280px] sm:max-w-md truncate">{formData.theme}</h3>
-                <span className={`inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded border ${statusBadge.color}`}>
+                <h3 className="font-semibold text-zinc-950 dark:text-zinc-50 text-xs sm:text-sm max-w-[180px] sm:max-w-md truncate">{formData.theme}</h3>
+                <span className={`inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded border ${statusBadge.color}`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${statusBadge.dot}`} />
                   <span>{statusBadge.label}</span>
                 </span>
               </div>
-              <p className="text-[11px] text-zinc-500 font-mono mt-0.5">
+              <p className="text-[10px] sm:text-[11px] text-zinc-500 font-mono mt-0.5">
                 {formData.scheduledDate} • {formData.dayOfWeek} • {formData.time || '11:30'}
               </p>
             </div>
           </div>
 
           {/* Tab Selector & Close */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <div className="flex items-center bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-md p-0.5 text-xs">
               <button
                 onClick={() => setActiveTab('details')}
-                className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                className={`px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all ${
                   activeTab === 'details'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                 }`}
               >
-                Fiche Édition (12 Col.)
+                <span className="sm:hidden">Fiche</span>
+                <span className="hidden sm:inline">Fiche Édition</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('ai_prompts')}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all ${
+                  activeTab === 'ai_prompts'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
+                    : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="sm:hidden">IA</span>
+                <span className="hidden sm:inline">Affiches & Prompts</span>
               </button>
               <button
                 onClick={() => setActiveTab('preview')}
-                className={`flex items-center gap-1 px-3 py-1 rounded text-xs font-medium transition-all ${
+                className={`flex items-center gap-1 px-2 sm:px-3 py-1 rounded text-xs font-medium transition-all ${
                   activeTab === 'preview'
                     ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
                 }`}
               >
                 <Smartphone className="w-3.5 h-3.5" />
-                <span>Rendu Mobile</span>
+                <span className="sm:hidden">Rendu</span>
+                <span className="hidden sm:inline">Rendu Mobile</span>
               </button>
             </div>
 
             <button
               onClick={() => setSelectedPost(null)}
-              className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all ml-2"
+              className="p-1 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all ml-1"
             >
               <X className="w-5 h-5" />
             </button>
@@ -396,9 +427,19 @@ export default function PostDetailModal() {
                 
                 {/* Visual Assets Upload Dropzone */}
                 <div>
-                  <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300 block mb-1">
-                    Visuel Créatif (Canva / Photoshop / Photos)
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                      Visuel Créatif (Canva / Photoshop / Photos)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('ai_prompts')}
+                      className="inline-flex items-center gap-1 text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline"
+                    >
+                      <Sparkles className="w-3 h-3" />
+                      <span>Studio Affiches IA</span>
+                    </button>
+                  </div>
 
                   {uploadProgress !== null && (
                     <div className="mb-2 p-2 rounded bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-[11px] font-mono">
@@ -510,6 +551,173 @@ export default function PostDetailModal() {
 
               </div>
             </div>
+          ) : activeTab === 'ai_prompts' ? (
+            /* Tab AI Prompts & Posters */
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {/* Studio Header Banner */}
+              <div className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-gradient-to-r from-zinc-50 via-zinc-100/50 to-indigo-50/40 dark:from-zinc-900/90 dark:via-zinc-900 dark:to-indigo-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h4 className="text-sm font-bold text-zinc-900 dark:text-zinc-100">Studio Affiches & Prompts IA</h4>
+                      <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/80 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                        Ratio 4:5 LinkedIn (1080×1350px)
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+                      Prompt calibré pour ChatGPT (DALL-E 3 / Canvas) et sources requises pour créer l&apos;affiche.
+                    </p>
+                  </div>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={handleCopyAiPrompt}
+                  className={`flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0 self-start sm:self-auto cursor-pointer ${
+                    copiedPrompt
+                      ? 'bg-emerald-600 text-white shadow-sm'
+                      : 'bg-zinc-900 text-white dark:bg-white dark:text-black hover:opacity-90'
+                  }`}
+                >
+                  {copiedPrompt ? (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>Prompt Copié !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copier le Prompt ChatGPT</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                {/* Left 7 Cols: Prompt & Sources */}
+                <div className="lg:col-span-7 space-y-5">
+                  
+                  {/* Prompt Box */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <span>Prompt Optimisé ChatGPT / DALL-E 3</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-zinc-400">
+                        Éditable en direct
+                      </span>
+                    </div>
+
+                    <div className="relative">
+                      <textarea
+                        rows={8}
+                        value={formData.aiVisualPrompt || ''}
+                        onChange={(e) => setFormData({ ...formData, aiVisualPrompt: e.target.value })}
+                        placeholder="Collez ou rédigez un prompt d'affiche pour ChatGPT..."
+                        className="w-full bg-zinc-900 text-zinc-100 border border-zinc-700/80 rounded-lg p-3.5 text-xs leading-relaxed font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500 selection:bg-indigo-500/30"
+                      />
+                    </div>
+                    <p className="text-[11px] text-zinc-500 dark:text-zinc-400 italic">
+                      💡 Copiez ce prompt dans ChatGPT (GPT-4o ou Canvas) avec votre photo en pièce jointe pour générer l&apos;affiche finale.
+                    </p>
+                  </div>
+
+                  {/* Sources Required List */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <span>Sources & Matières Premières à Fournir à ChatGPT</span>
+                    </label>
+
+                    <div className="p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/60 space-y-2.5">
+                      {(formData.aiPromptSources && formData.aiPromptSources.length > 0) ? (
+                        <ul className="space-y-2.5">
+                          {formData.aiPromptSources.map((source, idx) => (
+                            <li key={idx} className="flex items-start gap-2.5 text-xs text-zinc-700 dark:text-zinc-300 leading-normal">
+                              <span className="w-4 h-4 rounded-full bg-indigo-100 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 text-[10px] font-mono flex items-center justify-center shrink-0 mt-0.5 font-bold">
+                                {idx + 1}
+                              </span>
+                              <span>{source}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-xs text-zinc-500 italic">
+                          Téléversez votre photo ou votre charte graphique pour enrichir les sources de ce post.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* Right 5 Cols: Inspiration Poster & Web References */}
+                <div className="lg:col-span-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-cyan-500" />
+                      <span>Affiche Inspiration (Référence Web)</span>
+                    </label>
+                    <span className="text-[10px] font-mono text-zinc-400">
+                      Standard Agence
+                    </span>
+                  </div>
+
+                  {formData.inspirationUrls && formData.inspirationUrls.length > 0 ? (
+                    <div className="space-y-3">
+                      <div className="relative rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-950 shadow-md group">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                          src={formData.inspirationUrls[0]} 
+                          alt="Affiche Inspiration" 
+                          className="w-full aspect-[4/5] object-contain bg-zinc-950" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all flex flex-col justify-end p-4">
+                          <a
+                            href={formData.inspirationUrls[0]}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white text-black text-xs font-semibold self-start shadow-md hover:bg-zinc-200 transition-all"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Voir en Plein Écran (HD)</span>
+                          </a>
+                        </div>
+                      </div>
+
+                      {/* Quick Action: Use this inspiration as official media */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (formData.inspirationUrls && formData.inspirationUrls.length > 0) {
+                            const insp = formData.inspirationUrls[0];
+                            if (!formData.mediaUrls.includes(insp)) {
+                              setFormData({
+                                ...formData,
+                                mediaUrls: [insp, ...formData.mediaUrls]
+                              });
+                            }
+                          }
+                        }}
+                        className="w-full py-2 px-3 rounded-lg border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-100 bg-white dark:bg-zinc-900 text-xs font-medium text-zinc-700 dark:text-zinc-300 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Adopter cette affiche comme visuel du post</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="p-8 rounded-xl border border-dashed border-zinc-300 dark:border-zinc-700 text-center space-y-2 bg-zinc-50 dark:bg-zinc-900/40">
+                      <ImageIcon className="w-6 h-6 text-zinc-400 mx-auto" />
+                      <p className="text-xs text-zinc-500">Aucune affiche d&apos;inspiration rattachée.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           ) : (
             /* Tab Preview: Clean Smartphone Simulator */
             <div className="flex justify-center py-2">
@@ -557,27 +765,27 @@ export default function PostDetailModal() {
           )}
         </div>
 
-        {/* Modal Footer Controls */}
-        <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between">
+        {/* Modal Footer Controls (Thumb zone & Safe area) */}
+        <div className="p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+12px)] sm:pb-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between gap-2 shrink-0">
           <button
             onClick={handleTriggerWebhook}
             disabled={isSendingWebhook}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-md text-xs font-medium transition-all"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-medium transition-all"
           >
             <Radio className="w-3.5 h-3.5" />
             <span>{isSendingWebhook ? 'Envoi...' : 'Déclencher Make.com'}</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
             <button
               onClick={() => setSelectedPost(null)}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white"
+              className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 sm:border-0"
             >
               Fermer
             </button>
             <button
               onClick={handleSave}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-zinc-950 dark:bg-white text-white dark:text-black rounded-md text-xs font-semibold hover:opacity-90 transition-all active:scale-[0.98]"
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2 bg-zinc-950 dark:bg-white text-white dark:text-black rounded-lg text-xs font-semibold hover:opacity-90 transition-all active:scale-[0.98] shadow-xs"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Enregistrer</span>

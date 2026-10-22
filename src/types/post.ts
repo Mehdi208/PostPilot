@@ -43,6 +43,11 @@ export interface Post {
   // Médias uploadés (Canva / Photoshop / Photos réelles)
   mediaUrls: string[];
   
+  // Studio Affiches & Prompts IA (ChatGPT / DALL-E / Midjourney)
+  aiVisualPrompt?: string;          // Prompt complet et optimisé pour ChatGPT/DALL-E
+  aiPromptSources?: string[];       // Liste des sources et matières premières à uploader à l'IA
+  inspirationUrls?: string[];       // URLs des affiches d'inspiration de référence
+  
   // Feedbacks client & retouches
   clientFeedback?: ClientFeedback;
   notes?: string;                 // Notes internes de régie CM

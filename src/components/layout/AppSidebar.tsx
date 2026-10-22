@@ -48,7 +48,7 @@ export default function AppSidebar() {
   };
 
   return (
-    <aside className="w-60 bg-zinc-50 dark:bg-black border-r border-zinc-200 dark:border-zinc-800 flex flex-col h-screen shrink-0 text-zinc-800 dark:text-zinc-200 select-none">
+    <aside className="hidden md:flex md:w-60 bg-zinc-50 dark:bg-black border-r border-zinc-200 dark:border-zinc-800 flex-col h-screen shrink-0 text-zinc-800 dark:text-zinc-200 select-none">
       
       {/* Brand Header */}
       <div className="p-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">

@@ -37,10 +37,10 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v4';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v6';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
-// Renvoie les 16 publications officielles d'Octobre 2026 de FruiThé
+// Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
 function getInitialOctoberPosts(): Post[] {
   return (initialPostsData as unknown as Post[]).map(p => ({
     ...p,
@@ -58,16 +58,29 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
   // 1. Initialise avec les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
   basePosts.forEach(p => map.set(p.id, p));
 
-  // 2. Superpose les modifications sauvegardées sans écraser le workspaceId d'origine
+  // 2. Superpose les modifications sauvegardées sans écraser le workspaceId d'origine,
+  // et en assurant la présence des médias officiels et des dates stratégiques
   if (Array.isArray(savedList)) {
     savedList.forEach(sp => {
       if (sp && sp.id) {
         if (map.has(sp.id)) {
           const base = map.get(sp.id)!;
+          // Fusion intelligente des médias : préserve les visuels officiels
+          const mergedMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
+          // Si le post 1 de Méhdi était resté au 22 octobre, migration vers le vendredi 23 octobre
+          const mergedDate = (base.id === 'mehdi-post-1-presentation' && sp.scheduledDate === '2026-10-22')
+            ? base.scheduledDate
+            : (sp.scheduledDate || base.scheduledDate);
+
           map.set(sp.id, {
             ...base,
             ...sp,
             workspaceId: base.workspaceId, // Préserve le workspaceId légitime du post de base
+            mediaUrls: mergedMedia,
+            scheduledDate: mergedDate,
+            aiVisualPrompt: sp.aiVisualPrompt || base.aiVisualPrompt,
+            aiPromptSources: (sp.aiPromptSources && sp.aiPromptSources.length > 0) ? sp.aiPromptSources : base.aiPromptSources,
+            inspirationUrls: (sp.inspirationUrls && sp.inspirationUrls.length > 0) ? sp.inspirationUrls : base.inspirationUrls,
           });
         } else {
           // Nouveaux posts créés manuellement par l'utilisateur
@@ -123,18 +136,35 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Initialisation auto-réparatrice des posts (récupère v4 ou migre v3/v2/v1 sans perte)
+  // Initialisation auto-réparatrice des posts (récupère v5 ou migre v4/v3/v2/v1 sans perte)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedWorkspaceId = localStorage.getItem(STORAGE_KEY_WORKSPACE);
-      if (savedWorkspaceId) {
-        const found = DEFAULT_WORKSPACES.find(w => w.id === savedWorkspaceId);
-        if (found) setActiveWorkspaceState(found);
+      // 1. Détection prioritaire par paramètre d'URL (?workspace=mehdi-traore ou ?ws=mehdi-traore)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const wsParam = urlParams.get('workspace') || urlParams.get('ws');
+        if (wsParam) {
+          const found = DEFAULT_WORKSPACES.find(w => w.id === wsParam);
+          if (found) {
+            setActiveWorkspaceState(found);
+            localStorage.setItem(STORAGE_KEY_WORKSPACE, found.id);
+          }
+        } else {
+          const savedWorkspaceId = localStorage.getItem(STORAGE_KEY_WORKSPACE);
+          if (savedWorkspaceId) {
+            const found = DEFAULT_WORKSPACES.find(w => w.id === savedWorkspaceId);
+            if (found) setActiveWorkspaceState(found);
+          }
+        }
+      } catch {
+        // ignore
       }
 
-      // Lecture v4 ou versions antérieures
+      // Lecture v6 ou versions antérieures
       const rawStored = 
         localStorage.getItem(STORAGE_KEY_POSTS) || 
+        localStorage.getItem('postpilot_posts_v5') || 
+        localStorage.getItem('postpilot_posts_v4') || 
         localStorage.getItem('postpilot_posts_v3') || 
         localStorage.getItem('postpilot_posts_v2') || 
         localStorage.getItem('postpilot_posts_v1');
@@ -149,10 +179,15 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Auto-réparation immédiate : garantit l'intégralité des 16 posts
+      // Auto-réparation immédiate : garantit l'intégralité des 20 posts (16 FruiThé + 4 Méhdi Traoré)
       const healed = mergeWithInitialPosts(parsed);
       setPosts(healed);
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
+
+      // Nettoie les anciennes clés de localStorage pour libérer le quota
+      localStorage.removeItem('postpilot_posts_v5');
+      localStorage.removeItem('postpilot_posts_v4');
+      localStorage.removeItem('postpilot_posts_v3');
 
       // Batch save vers Firestore pour chaque workspace séparément
       DEFAULT_WORKSPACES.forEach(ws => {
@@ -169,18 +204,20 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = subscribeToWorkspacePosts(activeWorkspace.id, (firestorePosts) => {
       if (firestorePosts && firestorePosts.length > 0) {
         setPosts(currentPosts => {
-          // Base : les posts actuels ou les 16 posts de référence
-          const base = currentPosts.length >= 16 ? currentPosts : mergeWithInitialPosts(currentPosts);
+          // Base : les posts actuels ou les 20 posts de référence
+          const base = currentPosts.length >= 20 ? currentPosts : mergeWithInitialPosts(currentPosts);
           const map = new Map<string, Post>();
           base.forEach(p => map.set(p.id, p));
 
           // Fusionne les documents Firestore par ID sans effacer les autres posts
           firestorePosts.forEach(fp => {
             if (fp && fp.id) {
+              const prev = map.get(fp.id);
               map.set(fp.id, {
-                ...(map.get(fp.id) || fp),
+                ...(prev || fp),
                 ...fp,
                 workspaceId: fp.workspaceId || activeWorkspace.id,
+                mediaUrls: (fp.mediaUrls && fp.mediaUrls.length > 0) ? fp.mediaUrls : (prev?.mediaUrls || []),
               });
             }
           });

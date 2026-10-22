@@ -1,5 +1,5 @@
 // PostPilot PWA Service Worker — Enterprise Offline & Shell Cache
-const CACHE_NAME = 'postpilot-pwa-v2';
+const CACHE_NAME = 'postpilot-pwa-v4';
 const OFFLINE_FALLBACK = '/';
 
 const PRECACHE_ASSETS = [
@@ -14,6 +14,14 @@ const PRECACHE_ASSETS = [
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon.png',
   '/icons/icon.svg',
+  '/posts/mehdi/post-1-presentation.jpg',
+  '/posts/mehdi/post-2-article-ia.jpg',
+  '/posts/mehdi/post-3-carrousel-5p.jpg',
+  '/posts/mehdi/post-4-libre-cafe.jpg',
+  '/posts/inspiration/inspiration-1-personal-branding.jpg',
+  '/posts/inspiration/inspiration-2-ai-tech-editorial.jpg',
+  '/posts/inspiration/inspiration-3-carousel-5p-framework.jpg',
+  '/posts/inspiration/inspiration-4-discipline-lifestyle.jpg',
   '/radar/tapioca-brown-sugar.jpg',
   '/radar/caramel-pour.jpg',
   '/radar/combo-burger.jpg',

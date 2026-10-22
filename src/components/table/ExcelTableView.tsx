@@ -23,23 +23,23 @@ export default function ExcelTableView() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black p-5 overflow-hidden">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black p-3 sm:p-5 pb-20 md:pb-5 overflow-hidden">
       
       {/* Table Header Bar */}
-      <div className="flex items-center justify-between mb-3 px-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-3 mb-3 px-1 shrink-0">
         <div>
-          <h2 className="text-sm font-semibold text-zinc-950 dark:text-zinc-50 flex items-center gap-2">
+          <h2 className="text-xs sm:text-sm font-semibold text-zinc-950 dark:text-zinc-50 flex items-center gap-2">
             <span>Tableau Opérationnel — {activeWorkspace.name}</span>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-500">
               12 Colonnes
             </span>
           </h2>
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+          <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
             Synchronisation directe avec la feuille Excel. Cliquez sur le statut pour changer d&apos;état ou sur une ligne pour ouvrir l&apos;éditeur.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-auto">
           <div className="text-xs font-mono text-zinc-500">
             {filteredPosts.length} publications
           </div>
@@ -49,9 +49,16 @@ export default function ExcelTableView() {
             title="Recharger les 16 publications officielles d'Octobre 2026"
           >
             <RotateCcw className="w-3.5 h-3.5 text-zinc-500" />
-            <span>Recharger Octobre 2026</span>
+            <span className="hidden sm:inline">Recharger Octobre 2026</span>
+            <span className="sm:hidden">Recharger</span>
           </button>
         </div>
+      </div>
+
+      {/* Mobile Swipe Hint */}
+      <div className="md:hidden px-3 py-1.5 mb-2 bg-zinc-50 dark:bg-zinc-900/80 border border-zinc-200 dark:border-zinc-800 rounded-lg text-[11px] font-mono text-zinc-500 flex items-center justify-between shrink-0">
+        <span>👉 Glissez horizontalement (12 colonnes)</span>
+        <span className="text-zinc-950 dark:text-zinc-100 font-semibold">{filteredPosts.length} lignes</span>
       </div>
 
       {/* Spreadsheet Table Container */}

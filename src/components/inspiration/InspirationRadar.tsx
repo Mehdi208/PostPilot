@@ -68,22 +68,22 @@ export default function InspirationRadar() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-y-auto">
+    <div className="flex-1 flex flex-col h-full bg-white dark:bg-black text-zinc-900 dark:text-zinc-100 overflow-y-auto pb-20 md:pb-6">
       
       {/* Top Header Strip: Ultra-épuré & Professionnel */}
-      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-black/90 backdrop-blur-md px-6 py-4 sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white/90 dark:bg-black/90 backdrop-blur-md px-3 sm:px-6 py-3 sm:py-4 sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
           
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50 uppercase">
+              <h1 className="text-xs sm:text-sm font-semibold tracking-tight text-zinc-950 dark:text-zinc-50 uppercase">
                 Veille Concurrentielle & Derniers Posts
               </h1>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
-                Abidjan & Niche Food
+                Abidjan Food
               </span>
             </div>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+            <p className="text-[11px] sm:text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
               Recensement direct des dernières publications Instagram dans la niche des cafés, bubble teas et restaurants à Abidjan.
             </p>
           </div>
@@ -102,22 +102,22 @@ export default function InspirationRadar() {
 
         </div>
 
-        {/* Minimalist Controls: Période & Niche */}
-        <div className="max-w-7xl mx-auto mt-4 pt-3 border-t border-zinc-100 dark:border-zinc-900 flex flex-wrap items-center justify-between gap-3 text-xs">
+        {/* Minimalist Controls: Période & Niche (Mobile horizontal scroll) */}
+        <div className="max-w-7xl mx-auto mt-3 pt-2.5 border-t border-zinc-100 dark:border-zinc-900 flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-0.5 text-xs">
           
           {/* Périodes : 24h / 48h / 7j */}
-          <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800">
-            <span className="text-[10px] font-mono text-zinc-400 px-2 font-medium">Période :</span>
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
+            <span className="text-[10px] font-mono text-zinc-400 px-1.5 font-medium">Période :</span>
             {[
-              { id: 'all', label: 'Toutes les publications' },
-              { id: '24h', label: 'Dernières 24 heures' },
-              { id: '48h', label: 'Dernières 48 heures' },
-              { id: '7d', label: '7 derniers jours' },
+              { id: 'all', label: 'Toutes' },
+              { id: '24h', label: '24h' },
+              { id: '48h', label: '48h' },
+              { id: '7d', label: '7 jours' },
             ].map((p) => (
               <button
                 key={p.id}
                 onClick={() => setTimeframe(p.id as typeof timeframe)}
-                className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                className={`px-2 py-1 rounded-md text-xs font-medium transition-all ${
                   timeframe === p.id
                     ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-semibold'
                     : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-950 dark:hover:text-white'
@@ -129,12 +129,12 @@ export default function InspirationRadar() {
           </div>
 
           {/* Niches : Bubble Tea, Cafés, Restaurants */}
-          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-1 rounded-lg border border-zinc-200 dark:border-zinc-800">
+          <div className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
             {[
               { id: 'all', label: 'Toutes les niches' },
               { id: 'bubble_tea', label: '🧋 Bubble Tea' },
-              { id: 'cafe', label: '☕ Cafés & Coffee' },
-              { id: 'restaurant', label: '🍽️ Restaurants' },
+              { id: 'cafe', label: '☕ Cafés' },
+              { id: 'restaurant', label: '🍽️ Restos' },
             ].map((n) => (
               <button
                 key={n.id}
@@ -154,7 +154,7 @@ export default function InspirationRadar() {
       </div>
 
       {/* Main Grid: Clean Cards with True Screenshots */}
-      <div className="max-w-7xl mx-auto w-full p-6 space-y-6">
+      <div className="max-w-7xl mx-auto w-full p-3 sm:p-6 space-y-4 sm:space-y-6">
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredVideos.map((video) => (
