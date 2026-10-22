@@ -246,7 +246,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   const updatePost = (updatedPost: Post) => {
     setPosts(prevPosts => {
       const base = prevPosts.length >= 16 ? prevPosts : mergeWithInitialPosts(prevPosts);
-      const updated = base.map(p => (p.id === updatedPost.id ? updatedPost : p));
+      const exists = base.some(p => p.id === updatedPost.id);
+      const updated = exists
+        ? base.map(p => (p.id === updatedPost.id ? updatedPost : p))
+        : [...base, updatedPost];
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
       }
