@@ -339,8 +339,8 @@
     "id": "mehdi-post-1-presentation",
     "workspaceId": "mehdi-traore",
     "week": "S3",
-    "scheduledDate": "2026-10-22",
-    "dayOfWeek": "Jeu.",
+    "scheduledDate": "2026-10-23",
+    "dayOfWeek": "Ven.",
     "time": "08:30",
     "platforms": [
       "linkedin"
@@ -353,7 +353,9 @@
     "cta": "Partagez votre compétence hybride en commentaire",
     "status": "approved",
     "creativeBrief": "Photo portrait pro studio de Méhdi, chaleureux, regard direct, texte discret « Méhdi Traoré | Stratégie Digitale & Tech »",
-    "mediaUrls": [],
+    "mediaUrls": [
+      "/posts/mehdi/post-1-presentation.jpg"
+    ],
     "orderIndex": 17
   },
   {
@@ -374,7 +376,9 @@
     "cta": "Partagez votre avis en commentaire : opportunité ou menace ?",
     "status": "approved",
     "creativeBrief": "Bannière éditoriale typographique « IA vs Humain : Quel futur pour le Community Management ? »",
-    "mediaUrls": [],
+    "mediaUrls": [
+      "/posts/mehdi/post-2-article-ia.jpg"
+    ],
     "orderIndex": 18
   },
   {
@@ -395,7 +399,9 @@
     "cta": "Téléchargez le document PDF et donnez votre avis",
     "status": "approved",
     "creativeBrief": "Carrousel PDF 6 slides au ratio 4:5 (1080x1350) noir & blanc minimaliste avec touches d'indigo",
-    "mediaUrls": [],
+    "mediaUrls": [
+      "/posts/mehdi/post-3-carrousel-5p.jpg"
+    ],
     "orderIndex": 19
   },
   {
@@ -416,7 +422,9 @@
     "cta": "Partagez votre rituel du matin en commentaire",
     "status": "approved",
     "creativeBrief": "Photo réelle du bureau avec PostPilot sur écran d'ordinateur portable, café fumant et carnet de notes",
-    "mediaUrls": [],
+    "mediaUrls": [
+      "/posts/mehdi/post-4-libre-cafe.jpg"
+    ],
     "orderIndex": 20
   }
 ]

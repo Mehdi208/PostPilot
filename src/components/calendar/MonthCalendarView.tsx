@@ -380,6 +380,17 @@ export default function MonthCalendarView() {
                         {post.theme}
                       </div>
 
+                      {/* Visual Media Thumbnail Preview */}
+                      {post.mediaUrls && post.mediaUrls.length > 0 && (
+                        <div className="w-full h-24 rounded-md overflow-hidden my-1.5 border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-800 relative group-hover/card:scale-[1.01] transition-transform">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={post.mediaUrls[0]} alt={post.theme} className="w-full h-full object-cover" />
+                          <div className="absolute bottom-1 right-1 px-1 py-0.5 rounded bg-black/75 text-white text-[8px] font-mono backdrop-blur-xs">
+                            Visuel joint
+                          </div>
+                        </div>
+                      )}
+
                       {/* Product note if available */}
                       {post.featuredProduct && (
                         <div className="text-[10px] text-zinc-500 dark:text-zinc-400 truncate font-mono">

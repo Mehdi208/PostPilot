@@ -417,8 +417,12 @@ export default function PostDetailModal() {
                       <div className="grid grid-cols-2 gap-2">
                         {formData.mediaUrls.map((url, idx) => (
                           <div key={idx} className="relative rounded-md overflow-hidden border border-zinc-200 dark:border-zinc-800 group aspect-video bg-zinc-100 dark:bg-zinc-900">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={url} alt="Visuel" className="w-full h-full object-cover" />
+                            {url.match(/\.(mp4|webm|mov)$/i) ? (
+                              <video src={url} controls className="w-full h-full object-cover" />
+                            ) : (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img src={url} alt="Visuel" className="w-full h-full object-cover" />
+                            )}
                             <button
                               onClick={() => handleRemoveMedia(idx)}
                               className="absolute top-1 right-1 p-1 rounded bg-black text-white text-xs opacity-0 group-hover:opacity-100 transition-all"
@@ -522,8 +526,12 @@ export default function PostDetailModal() {
 
                   <div className="aspect-square bg-zinc-100 dark:bg-zinc-900 flex items-center justify-center text-center p-4">
                     {formData.mediaUrls.length > 0 ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={formData.mediaUrls[0]} alt="Aperçu" className="w-full h-full object-cover" />
+                      formData.mediaUrls[0].match(/\.(mp4|webm|mov)$/i) ? (
+                        <video src={formData.mediaUrls[0]} controls className="w-full h-full object-cover" />
+                      ) : (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={formData.mediaUrls[0]} alt="Aperçu" className="w-full h-full object-cover" />
+                      )
                     ) : (
                       <div className="space-y-1">
                         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">{formData.theme}</p>
