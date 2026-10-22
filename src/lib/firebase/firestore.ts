@@ -76,17 +76,20 @@ export async function batchSavePostsToFirestore(
   try {
     const batch = writeBatch(db);
 
-    posts.forEach((post) => {
+    const targetPosts = posts.filter(p => (p.workspaceId || workspaceId) === workspaceId);
+    if (targetPosts.length === 0) return { success: true, count: 0 };
+
+    targetPosts.forEach((post) => {
       const postRef = doc(db, 'workspaces', workspaceId, 'posts', post.id);
       batch.set(postRef, {
         ...post,
-        workspaceId,
+        workspaceId: post.workspaceId || workspaceId,
         updatedAt: new Date().toISOString(),
       }, { merge: true });
     });
 
     await batch.commit();
-    return { success: true, count: posts.length };
+    return { success: true, count: targetPosts.length };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue';
     return { success: false, count: 0, error: message };

@@ -49,23 +49,25 @@ function getInitialOctoberPosts(): Post[] {
   }));
 }
 
-// Fusion auto-réparatrice : garantit que les 16 publications sont toujours présentes,
+// Fusion auto-réparatrice : garantit que toutes les publications de base sont toujours présentes,
 // tout en conservant les modifications (déplacements de dates, changements de statut, feedbacks client).
 function mergeWithInitialPosts(savedList: Post[]): Post[] {
   const basePosts = getInitialOctoberPosts();
   const map = new Map<string, Post>();
 
-  // 1. Initialise avec les 16 posts officiels
+  // 1. Initialise avec les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
   basePosts.forEach(p => map.set(p.id, p));
 
-  // 2. Superpose les modifications sauvegardées sans rien supprimer
+  // 2. Superpose les modifications sauvegardées sans écraser le workspaceId d'origine
   if (Array.isArray(savedList)) {
     savedList.forEach(sp => {
       if (sp && sp.id) {
         if (map.has(sp.id)) {
+          const base = map.get(sp.id)!;
           map.set(sp.id, {
-            ...map.get(sp.id)!,
+            ...base,
             ...sp,
+            workspaceId: base.workspaceId, // Préserve le workspaceId légitime du post de base
           });
         } else {
           // Nouveaux posts créés manuellement par l'utilisateur
@@ -152,8 +154,13 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       setPosts(healed);
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
 
-      // Batch save vers Firestore pour peupler la collection si vide
-      batchSavePostsToFirestore(DEFAULT_WORKSPACES[0].id, healed).catch(() => {});
+      // Batch save vers Firestore pour chaque workspace séparément
+      DEFAULT_WORKSPACES.forEach(ws => {
+        const wsPosts = healed.filter(p => p.workspaceId === ws.id);
+        if (wsPosts.length > 0) {
+          batchSavePostsToFirestore(ws.id, wsPosts).catch(() => {});
+        }
+      });
     }
   }, []);
 
@@ -173,6 +180,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
               map.set(fp.id, {
                 ...(map.get(fp.id) || fp),
                 ...fp,
+                workspaceId: fp.workspaceId || activeWorkspace.id,
               });
             }
           });
@@ -195,7 +203,8 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(official));
     }
-    batchSavePostsToFirestore(activeWorkspace.id, official).catch(() => {});
+    const wsPosts = official.filter(p => p.workspaceId === activeWorkspace.id);
+    batchSavePostsToFirestore(activeWorkspace.id, wsPosts).catch(() => {});
   };
 
   const setActiveWorkspace = (workspace: Workspace) => {
