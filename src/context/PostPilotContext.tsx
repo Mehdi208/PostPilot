@@ -301,6 +301,15 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       if (targetPost) {
         syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+        
+        // Archivage automatique sur la machine dès que le post passe en 'published'
+        if ((targetPost as Post).status === 'published') {
+          fetch('/api/posts/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post: targetPost }),
+          }).catch(() => {});
+        }
       }
     }, 0);
 
@@ -371,6 +380,15 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       if (targetPost) {
         syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+        
+        // Archivage automatique sur la machine dès que le post passe en 'published'
+        if ((targetPost as Post).status === 'published') {
+          fetch('/api/posts/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post: targetPost }),
+          }).catch(() => {});
+        }
       }
     }, 0);
 
@@ -436,6 +454,15 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     setTimeout(() => {
       if (targetPost) {
         syncPostToFirestore(activeWorkspace.id, targetPost).catch(() => {});
+        
+        // Archivage automatique sur la machine dès que le post passe en 'published'
+        if ((targetPost as Post).status === 'published') {
+          fetch('/api/posts/archive', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ post: targetPost }),
+          }).catch(() => {});
+        }
       }
     }, 0);
   };
