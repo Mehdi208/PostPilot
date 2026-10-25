@@ -320,6 +320,22 @@ export default function MonthCalendarView() {
                         </div>
                       )}
 
+                      {/* Visual Media Thumbnail Preview */}
+                      {post.mediaUrls && post.mediaUrls.length > 0 && (
+                        <div className="relative w-full h-28 rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-800 bg-zinc-100 dark:bg-zinc-950 my-1">
+                          {post.mediaUrls[0].match(/\.(mp4|webm|mov)$/i) ? (
+                            <video src={post.mediaUrls[0]} className="w-full h-full object-cover" />
+                          ) : (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img
+                              src={post.mediaUrls[0]}
+                              alt={post.theme}
+                              className="w-full h-full object-cover"
+                            />
+                          )}
+                        </div>
+                      )}
+
                       {/* Caption excerpt */}
                       <p className="text-xs text-zinc-500 dark:text-zinc-400 line-clamp-2 leading-relaxed">
                         {post.caption}

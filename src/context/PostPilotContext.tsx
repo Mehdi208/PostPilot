@@ -196,6 +196,30 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
           batchSavePostsToFirestore(ws.id, wsPosts).catch(() => {});
         }
       });
+
+      // Scan automatique des dossiers public/visuels/ pour lier les images locales par date
+      fetch('/api/visuels/scan')
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.folders) {
+            setPosts(currentList => {
+              let changed = false;
+              const updated = currentList.map(p => {
+                const folderImages = data.folders[p.scheduledDate];
+                if (folderImages && folderImages.length > 0 && (!p.mediaUrls || p.mediaUrls.length === 0)) {
+                  changed = true;
+                  return { ...p, mediaUrls: folderImages };
+                }
+                return p;
+              });
+              if (changed && typeof window !== 'undefined') {
+                localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(updated));
+              }
+              return changed ? updated : currentList;
+            });
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 

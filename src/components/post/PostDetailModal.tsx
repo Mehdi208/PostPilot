@@ -19,8 +19,11 @@ import {
   Copy,
   ExternalLink,
   Image as ImageIcon,
-  CheckCircle2
+  CheckCircle2,
+  Folder,
+  RefreshCw
 } from 'lucide-react';
+import LinkedInPublishModal from '@/components/post/LinkedInPublishModal';
 
 const STATUS_OPTIONS: { value: PostStatus; label: string }[] = [
   { value: 'draft', label: 'Brouillon' },
@@ -48,6 +51,13 @@ export default function PostDetailModal() {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [copiedPrompt, setCopiedPrompt] = useState(false);
 
+  // LinkedIn Publish Modal State
+  const [isLinkedInModalOpen, setIsLinkedInModalOpen] = useState(false);
+
+  // Folder Scanner State
+  const [isScanningFolder, setIsScanningFolder] = useState(false);
+  const [folderScanMsg, setFolderScanMsg] = useState<string | null>(null);
+
   // Copilote IA State
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
@@ -57,6 +67,19 @@ export default function PostDetailModal() {
       setFormData({ ...selectedPost });
       setWebhookMsg(null);
       setAiSuggestion(null);
+      setFolderScanMsg(null);
+
+      // Auto-scan du dossier correspondant à la date du post si aucun visuel
+      if (!selectedPost.mediaUrls || selectedPost.mediaUrls.length === 0) {
+        fetch(`/api/visuels/scan?date=${selectedPost.scheduledDate}`)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success && Array.isArray(data.files) && data.files.length > 0) {
+              setFormData((prev) => (prev ? { ...prev, mediaUrls: data.files } : prev));
+            }
+          })
+          .catch(() => {});
+      }
     }
   }, [selectedPost]);
 
@@ -105,6 +128,27 @@ export default function PostDetailModal() {
     setSelectedPost(null);
   };
 
+  const handleScanFolder = async () => {
+    if (!formData?.scheduledDate) return;
+    setIsScanningFolder(true);
+    setFolderScanMsg(null);
+    try {
+      const res = await fetch(`/api/visuels/scan?date=${formData.scheduledDate}`);
+      const data = await res.json();
+      setIsScanningFolder(false);
+      if (data.success && Array.isArray(data.files) && data.files.length > 0) {
+        const combined = [...new Set([...formData.mediaUrls, ...data.files])];
+        setFormData((prev) => (prev ? { ...prev, mediaUrls: combined } : prev));
+        setFolderScanMsg(`${data.files.length} visuel(s) trouvé(s) et chargé(s) depuis le dossier !`);
+      } else {
+        setFolderScanMsg(`Dossier prêt : public/visuels/${formData.scheduledDate}/ (aucun fichier pour le moment)`);
+      }
+    } catch {
+      setIsScanningFolder(false);
+      setFolderScanMsg("Erreur lors de l'analyse du dossier.");
+    }
+  };
+
   const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -121,7 +165,8 @@ export default function PostDetailModal() {
           formData.workspaceId,
           formData.id,
           file,
-          (percent) => setUploadProgress(percent)
+          (percent) => setUploadProgress(percent),
+          formData.scheduledDate
         );
         newUrls.push(uploadedUrl);
       }
@@ -439,6 +484,36 @@ export default function PostDetailModal() {
                       <Sparkles className="w-3 h-3" />
                       <span>Studio Affiches IA</span>
                     </button>
+                  </div>
+
+                  {/* Architecture Dossier Local du Post */}
+                  <div className="mb-3 p-2.5 rounded-lg bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-1.5 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] uppercase font-bold text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+                        <Folder className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                        <span>Dossier local de ce post :</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleScanFolder}
+                        disabled={isScanningFolder}
+                        className="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${isScanningFolder ? 'animate-spin' : ''}`} />
+                        <span>Scanner le dossier</span>
+                      </button>
+                    </div>
+                    <p className="font-mono text-[11px] text-zinc-800 dark:text-zinc-200 bg-white dark:bg-zinc-950 p-1.5 rounded border border-zinc-200 dark:border-zinc-800 truncate select-all">
+                      public/visuels/{formData.scheduledDate}/
+                    </p>
+                    <p className="text-[10px] text-zinc-500">
+                      Déposez simplement votre affiche dans ce dossier, puis cliquez sur « Scanner ».
+                    </p>
+                    {folderScanMsg && (
+                      <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">
+                        {folderScanMsg}
+                      </p>
+                    )}
                   </div>
 
                   {uploadProgress !== null && (
@@ -767,25 +842,36 @@ export default function PostDetailModal() {
 
         {/* Modal Footer Controls (Thumb zone & Safe area) */}
         <div className="p-3 sm:p-4 pb-[calc(env(safe-area-inset-bottom)+12px)] sm:pb-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between gap-2 shrink-0">
-          <button
-            onClick={handleTriggerWebhook}
-            disabled={isSendingWebhook}
-            className="hidden sm:flex items-center gap-1.5 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-medium transition-all"
-          >
-            <Radio className="w-3.5 h-3.5" />
-            <span>{isSendingWebhook ? 'Envoi...' : 'Déclencher Make.com'}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Bouton Publier sur LinkedIn */}
+            <button
+              onClick={() => setIsLinkedInModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-lg text-xs font-bold transition-all shadow-xs active:scale-[0.98] shrink-0"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              <span>Publier sur LinkedIn</span>
+            </button>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+            <button
+              onClick={handleTriggerWebhook}
+              disabled={isSendingWebhook}
+              className="hidden md:flex items-center gap-1.5 px-3 py-2 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-xs font-medium transition-all"
+            >
+              <Radio className="w-3.5 h-3.5" />
+              <span>{isSendingWebhook ? 'Envoi...' : 'Webhook Make.com'}</span>
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2 justify-end">
             <button
               onClick={() => setSelectedPost(null)}
-              className="px-4 py-2 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 sm:border-0"
+              className="px-3 sm:px-4 py-2 rounded-lg text-xs font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-white border border-zinc-200 dark:border-zinc-800 sm:border-0"
             >
               Fermer
             </button>
             <button
               onClick={handleSave}
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2 bg-zinc-950 dark:bg-white text-white dark:text-black rounded-lg text-xs font-semibold hover:opacity-90 transition-all active:scale-[0.98] shadow-xs"
+              className="flex items-center justify-center gap-1.5 px-4 sm:px-5 py-2 bg-zinc-950 dark:bg-white text-white dark:text-black rounded-lg text-xs font-semibold hover:opacity-90 transition-all active:scale-[0.98] shadow-xs"
             >
               <Save className="w-3.5 h-3.5" />
               <span>Enregistrer</span>
@@ -794,6 +880,18 @@ export default function PostDetailModal() {
         </div>
 
       </div>
+
+      {/* LinkedIn Publish Modal */}
+      {formData && (
+        <LinkedInPublishModal
+          isOpen={isLinkedInModalOpen}
+          onClose={() => setIsLinkedInModalOpen(false)}
+          post={formData}
+          onPublished={() => {
+            setFormData((prev) => (prev ? { ...prev, status: 'published' } : prev));
+          }}
+        />
+      )}
     </div>
   );
 }
