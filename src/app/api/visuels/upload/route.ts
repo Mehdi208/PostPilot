@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
     const fileName = `${Date.now()}_${sanitizedName}`;
 
-    // Tentative d'écriture locale dans public/visuels/<date>/
+    // 1. Tentative d'écriture locale dans public/visuels/<date>/ (environnements Node/Local)
     try {
       const baseDir = path.join(process.cwd(), 'public', 'visuels');
       const targetDir = path.join(baseDir, date);
@@ -57,8 +57,38 @@ export async function POST(req: NextRequest) {
         date,
       });
     } catch {
-      // Fallback environnement Serverless / Vercel (read-only filesystem)
-      // Conversion directe en Data URL Base64 pour persistance instantanée
+      // 2. Environnement Serverless / Vercel (système de fichiers en lecture seule)
+      // Hébergement public instantané via CDN haute vitesse pour Make.com & LinkedIn
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+        const blob = new Blob([buffer], { type: file.type });
+        const cdnFormData = new FormData();
+        cdnFormData.append('files[]', blob, fileName);
+
+        const uploadRes = await fetch('https://uguu.se/upload', {
+          method: 'POST',
+          body: cdnFormData,
+          signal: AbortSignal.timeout(8000),
+        });
+
+        if (uploadRes.ok) {
+          const resData = await uploadRes.json();
+          if (resData?.success && resData?.files?.[0]?.url) {
+            return NextResponse.json({
+              success: true,
+              url: resData.files[0].url,
+              fileName,
+              date,
+              isCdn: true,
+            });
+          }
+        }
+      } catch (cdnErr) {
+        console.warn('Hébergement CDN indisponible, bascule vers stockage mémoire Base64:', cdnErr);
+      }
+
+      // 3. Fallback ultime : Data URL Base64 persistée côté client
       const arrayBuffer = await file.arrayBuffer();
       const base64 = Buffer.from(arrayBuffer).toString('base64');
       const dataUrl = `data:${file.type};base64,${base64}`;

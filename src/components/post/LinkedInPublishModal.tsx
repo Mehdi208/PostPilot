@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Post } from '@/types/post';
 import { usePostPilot } from '@/context/PostPilotContext';
 import { 
@@ -14,9 +14,10 @@ import {
   CheckCircle2, 
   AlertCircle,
   HelpCircle,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon,
+  CheckCheck
 } from 'lucide-react';
-import Image from 'next/image';
 
 interface LinkedInPublishModalProps {
   isOpen: boolean;
@@ -31,15 +32,32 @@ export default function LinkedInPublishModal({
   post,
   onPublished,
 }: LinkedInPublishModalProps) {
-  const { activeWorkspace, updatePostStatus } = usePostPilot();
+  const { activeWorkspace, updatePostStatus, setWorkspaceWebhookUrl } = usePostPilot();
 
   const [copiedText, setCopiedText] = useState(false);
-  const [activeTab, setActiveTab] = useState<'direct' | 'webhook'>('direct');
-  const [webhookUrl, setWebhookUrl] = useState(activeWorkspace.webhookUrl || '');
+  const [activeTab, setActiveTab] = useState<'webhook' | 'direct'>('webhook');
+  const [webhookUrl, setWebhookUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
+  // Initialisation et restauration automatique du webhook persistant
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = 
+        activeWorkspace.webhookUrl || 
+        localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) || 
+        localStorage.getItem('postpilot_linkedin_webhook_url') || 
+        '';
+      setWebhookUrl(saved);
+    }
+  }, [activeWorkspace.id, activeWorkspace.webhookUrl]);
+
   if (!isOpen) return null;
+
+  const handleWebhookChange = (val: string) => {
+    setWebhookUrl(val);
+    setWorkspaceWebhookUrl(activeWorkspace.id, val);
+  };
 
   const handleCopyText = () => {
     navigator.clipboard.writeText(post.caption);
@@ -73,6 +91,20 @@ export default function LinkedInPublishModal({
   };
 
   const handleSendViaWebhook = async () => {
+    const effectiveUrl = webhookUrl.trim() || 
+      (typeof window !== 'undefined' ? (localStorage.getItem('postpilot_linkedin_webhook_url') || localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) || '') : '');
+
+    if (!effectiveUrl) {
+      setStatusMessage({
+        type: 'error',
+        text: 'Veuillez renseigner votre URL de Webhook Make.com ci-dessous.',
+      });
+      return;
+    }
+
+    // Sauvegarde persistante immédiate
+    setWorkspaceWebhookUrl(activeWorkspace.id, effectiveUrl);
+
     setIsSubmitting(true);
     setStatusMessage(null);
 
@@ -86,7 +118,7 @@ export default function LinkedInPublishModal({
           theme: post.theme,
           postId: post.id,
           workspaceId: post.workspaceId,
-          webhookUrl: webhookUrl.trim() || undefined,
+          webhookUrl: effectiveUrl,
         }),
       });
 
@@ -103,7 +135,7 @@ export default function LinkedInPublishModal({
       } else if (data.requiresSetup) {
         setStatusMessage({
           type: 'info',
-          text: 'Aucun webhook configuré. Vous pouvez utiliser la publication instantanée 1-Clic à gauche, ou coller votre URL de Webhook Make.com ci-dessous.',
+          text: 'Aucun webhook configuré. Veuillez coller votre URL de Webhook Make.com ci-dessous.',
         });
       } else {
         setStatusMessage({
@@ -147,7 +179,7 @@ export default function LinkedInPublishModal({
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all"
+            className="p-2 rounded-lg text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -156,26 +188,26 @@ export default function LinkedInPublishModal({
         {/* Tab switch */}
         <div className="flex border-b border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/40 px-4 pt-2">
           <button
-            onClick={() => setActiveTab('direct')}
-            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
-              activeTab === 'direct'
-                ? 'border-[#0A66C2] text-[#0A66C2] dark:text-blue-400'
-                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Publication 1-Clic (Recommandé)</span>
-          </button>
-          <button
             onClick={() => setActiveTab('webhook')}
-            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 ${
+            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
               activeTab === 'webhook'
                 ? 'border-[#0A66C2] text-[#0A66C2] dark:text-blue-400'
                 : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
             }`}
           >
             <Radio className="w-3.5 h-3.5" />
-            <span>Automatisation Webhook (Make / Zapier)</span>
+            <span>Automatisation Webhook (Make.com)</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('direct')}
+            className={`pb-2 px-3 text-xs font-semibold border-b-2 transition-all flex items-center gap-1.5 cursor-pointer ${
+              activeTab === 'direct'
+                ? 'border-[#0A66C2] text-[#0A66C2] dark:text-blue-400'
+                : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Publication 1-Clic</span>
           </button>
         </div>
 
@@ -204,7 +236,123 @@ export default function LinkedInPublishModal({
             </div>
           )}
 
-          {activeTab === 'direct' ? (
+          {/* Bloc Visuel Partagé pour les deux onglets */}
+          {visualUrl ? (
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800/50">
+              <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 border border-zinc-200 dark:border-zinc-700 bg-zinc-950 shadow-xs">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={visualUrl} alt="Visuel Importé" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-xs font-semibold text-zinc-900 dark:text-zinc-100">
+                    Affiche importée prête pour LinkedIn
+                  </p>
+                </div>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Votre visuel ChatGPT / Canva sera transmis directement à Make.com et publié sur LinkedIn.
+                </p>
+              </div>
+              <a
+                href={visualUrl}
+                download={`post-${post.scheduledDate}-affiche.jpg`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 text-[11px] font-medium transition-all"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Télécharger</span>
+              </a>
+            </div>
+          ) : (
+            <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200/80 dark:border-amber-800/50">
+              <ImageIcon className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-amber-900 dark:text-amber-300">
+                  Aucun visuel importé pour ce post
+                </p>
+                <p className="text-[11px] text-amber-800/80 dark:text-amber-400/80 mt-0.5">
+                  Vous pouvez copier le prompt dans l&apos;onglet <strong>« Studio Affiches IA »</strong> pour générer votre affiche avec ChatGPT, puis l&apos;importer dans la publication avant de publier.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'webhook' ? (
+            <div className="space-y-4">
+              
+              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-xs flex items-center gap-1.5">
+                      <Radio className="w-3.5 h-3.5 text-[#0A66C2]" />
+                      <span>Publication Automatique Make.com</span>
+                    </h3>
+                    <p className="text-zinc-500 text-[11px] mt-0.5">
+                      Transmet automatiquement le texte et votre affiche importée à votre scénario Make connecté à LinkedIn.
+                    </p>
+                  </div>
+                  {webhookUrl && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono font-medium px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                      <CheckCheck className="w-3 h-3" />
+                      Mémorisé
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-mono uppercase text-zinc-500 dark:text-zinc-400 font-semibold">
+                      URL du Webhook Make.com :
+                    </label>
+                    <span className="text-[10px] text-zinc-400 font-mono">
+                      Sauvegarde persistante automatique
+                    </span>
+                  </div>
+                  <input
+                    type="url"
+                    value={webhookUrl}
+                    onChange={(e) => handleWebhookChange(e.target.value)}
+                    placeholder="https://hook.eu1.make.com/xxxxxxxxxxxxxxxxxxxxxxxx"
+                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#0A66C2]"
+                  />
+                  <p className="text-[10px] text-zinc-500 dark:text-zinc-400 italic">
+                    💡 Cette URL est enregistrée automatiquement. Vous n&apos;avez plus besoin de la renseigner pour les autres publications.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleSendViaWebhook}
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:opacity-90 rounded-xl text-xs font-bold transition-all disabled:opacity-50 cursor-pointer shadow-sm active:scale-[0.99]"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>{isSubmitting ? 'Publication en cours sur LinkedIn...' : 'Déclencher la publication automatique'}</span>
+                </button>
+              </div>
+
+              {/* Aperçu du Texte */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="font-mono text-[10px] uppercase font-bold text-zinc-400">
+                    Texte envoyé à LinkedIn ({post.caption.length} caractères) :
+                  </span>
+                  <button
+                    onClick={handleCopyText}
+                    className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-200 flex items-center gap-1 cursor-pointer"
+                  >
+                    {copiedText ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedText ? 'Copié !' : 'Copier'}</span>
+                  </button>
+                </div>
+                <div className="p-3 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 max-h-40 overflow-y-auto font-sans whitespace-pre-line text-zinc-800 dark:text-zinc-200 leading-relaxed text-xs">
+                  {post.caption}
+                </div>
+              </div>
+
+            </div>
+          ) : (
             <div className="space-y-4">
               
               {/* Direct 1-Click Launch Button */}
@@ -220,68 +368,14 @@ export default function LinkedInPublishModal({
                   </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-2 pt-1">
-                  <button
-                    onClick={handleOpenLinkedInAndCopy}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-[0.98]"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Copier le texte & Ouvrir LinkedIn</span>
-                  </button>
-
-                  <button
-                    onClick={handleCopyText}
-                    className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-800 dark:text-zinc-200 rounded-xl text-xs font-medium transition-all"
-                  >
-                    {copiedText ? (
-                      <>
-                        <Check className="w-3.5 h-3.5 text-emerald-500" />
-                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">Copié !</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copier seulement</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+                <button
+                  onClick={handleOpenLinkedInAndCopy}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#0A66C2] hover:bg-[#084e96] text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-[0.99] cursor-pointer"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  <span>Ouvrir LinkedIn & Copier le Texte (Recommandé)</span>
+                </button>
               </div>
-
-              {/* Visuel du post avec raccourci de téléchargement */}
-              {visualUrl && (
-                <div className="p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900/30 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-14 h-14 rounded-lg overflow-hidden border border-zinc-300 dark:border-zinc-700 shrink-0 bg-black">
-                      <Image
-                        src={visualUrl}
-                        alt="Affiche"
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-zinc-900 dark:text-zinc-100 text-xs">
-                        Visuel officiel associé
-                      </p>
-                      <p className="text-[11px] text-zinc-500 font-mono truncate max-w-[240px]">
-                        {visualUrl}
-                      </p>
-                    </div>
-                  </div>
-
-                  <a
-                    href={visualUrl}
-                    download
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded-lg text-xs font-medium transition-all"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Télécharger</span>
-                  </a>
-                </div>
-              )}
 
               {/* Aperçu du Texte Complet */}
               <div>
@@ -299,43 +393,6 @@ export default function LinkedInPublishModal({
               </div>
 
             </div>
-          ) : (
-            <div className="space-y-4">
-              
-              <div className="p-4 rounded-xl bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 space-y-3">
-                <div>
-                  <h3 className="font-bold text-zinc-900 dark:text-zinc-100 text-xs">
-                    Automatisation via Make.com / Webhook
-                  </h3>
-                  <p className="text-zinc-500 text-[11px] mt-0.5">
-                    Déclenche un scénario Make.com ou Zapier connecté à votre compte LinkedIn pour publier en arrière-plan sans action manuelle.
-                  </p>
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-mono uppercase text-zinc-400 font-semibold">
-                    URL du Webhook de publication :
-                  </label>
-                  <input
-                    type="url"
-                    value={webhookUrl}
-                    onChange={(e) => setWebhookUrl(e.target.value)}
-                    placeholder="https://hook.eu1.make.com/xxxxxxxxxxxxxxxxxxxxxxxx"
-                    className="w-full bg-white dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-700 rounded-lg px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 placeholder-zinc-400 focus:outline-none focus:border-[#0A66C2]"
-                  />
-                </div>
-
-                <button
-                  onClick={handleSendViaWebhook}
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-zinc-900 dark:bg-white text-white dark:text-zinc-950 hover:opacity-90 rounded-xl text-xs font-bold transition-all disabled:opacity-50"
-                >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>{isSubmitting ? 'Transmission en cours...' : 'Déclencher la publication automatique'}</span>
-                </button>
-              </div>
-
-            </div>
           )}
 
         </div>
@@ -344,14 +401,14 @@ export default function LinkedInPublishModal({
         <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 flex items-center justify-between gap-3 shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-800"
+            className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200 border border-zinc-200 dark:border-zinc-800 cursor-pointer"
           >
             Fermer
           </button>
 
           <button
             onClick={handleMarkAsPublished}
-            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold transition-all shadow-sm active:scale-[0.98] cursor-pointer"
           >
             <Check className="w-3.5 h-3.5" />
             <span>Valider comme « Publié en ligne »</span>

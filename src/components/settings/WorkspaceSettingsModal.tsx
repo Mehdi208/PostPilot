@@ -29,7 +29,14 @@ export default function WorkspaceSettingsModal({ isOpen, onClose }: WorkspaceSet
 
   const [clientName, setClientName] = useState(activeWorkspace.clientName || 'Responsable FruiThé');
   const [clientPhone, setClientPhone] = useState(activeWorkspace.clientPhone || '+225 0596935050');
-  const [webhookUrl, setWebhookUrl] = useState(activeWorkspace.webhookUrl || '');
+  const [webhookUrl, setWebhookUrl] = useState(() => {
+    if (activeWorkspace.webhookUrl) return activeWorkspace.webhookUrl;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) ||
+             localStorage.getItem('postpilot_linkedin_webhook_url') || '';
+    }
+    return '';
+  });
   const [previewToken, setPreviewToken] = useState(activeWorkspace.previewToken);
   const [copied, setCopied] = useState(false);
 

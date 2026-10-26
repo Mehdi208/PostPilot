@@ -558,10 +558,10 @@ export default function PostDetailModal() {
                     <label className="border border-dashed border-zinc-300 dark:border-zinc-700 hover:border-zinc-400 dark:hover:border-zinc-500 bg-zinc-50 dark:bg-zinc-900/40 rounded-lg p-5 flex flex-col items-center justify-center text-center cursor-pointer transition-all">
                       <Upload className="w-5 h-5 text-zinc-400 mb-1" />
                       <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">
-                        Glissez le visuel Canva ou Photoshop
+                        Glissez votre affiche générée avec ChatGPT, Canva ou Photoshop
                       </p>
                       <p className="text-[10px] text-zinc-400 font-mono mt-0.5">
-                        PNG, JPG ou MP4
+                        PNG, JPG ou MP4 • Cliquez pour importer votre fichier
                       </p>
                       <input type="file" onChange={handleMediaUpload} accept="image/*,video/*" multiple className="hidden" />
                     </label>

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { resolvePublicMediaUrls } from '@/lib/utils/media-url';
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,27 +11,11 @@ export async function POST(req: NextRequest) {
     }
 
     const webhookUrl = process.env.MAKE_WEBHOOK_URL;
+    const baseUrl = process.env.APP_BASE_URL || 'https://postpilot-three-delta.vercel.app';
 
-    const baseUrl = 'https://postpilot-three-delta.vercel.app';
-    const fallbackMap: Record<string, string> = {
-      'mehdi-post-1-presentation': `${baseUrl}/posts/mehdi/post-1-presentation.jpg`,
-      'mehdi-post-2-article': `${baseUrl}/posts/mehdi/post-2-article-ia.jpg`,
-      'mehdi-post-3-carrousel': `${baseUrl}/posts/mehdi/post-3-carrousel-5p.jpg`,
-      'mehdi-post-4-libre': `${baseUrl}/posts/mehdi/post-4-libre-cafe.jpg`,
-    };
-
-    const cleanMediaUrls = (post.mediaUrls || []).map((url: string) => {
-      if (!url) return '';
-      if (url.startsWith('data:')) {
-        return fallbackMap[post.id || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
-      }
-      if (url.startsWith('/')) {
-        return `${baseUrl}${url}`;
-      }
-      return url;
-    }).filter(Boolean);
-
-    const firstImageUrl = cleanMediaUrls[0] || fallbackMap[post.id || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
+    // Résolution publique des médias réels sans aucun fallback vers d'anciennes affiches
+    const cleanMediaUrls = await resolvePublicMediaUrls(post.mediaUrls || [], baseUrl);
+    const firstImageUrl = cleanMediaUrls.length > 0 ? cleanMediaUrls[0] : '';
 
     const payload = {
       event: event || 'post.approved',
@@ -45,7 +30,7 @@ export async function POST(req: NextRequest) {
       imageUrl: firstImageUrl,
       featuredProduct: post.featuredProduct,
       cta: post.cta,
-      mediaUrls: cleanMediaUrls.length > 0 ? cleanMediaUrls : [firstImageUrl],
+      mediaUrls: cleanMediaUrls,
       dispatchedAt: new Date().toISOString(),
     };
 

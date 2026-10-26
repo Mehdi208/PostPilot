@@ -29,6 +29,7 @@ interface PostPilotContextType {
   importPosts: (newPosts: Post[]) => void;
   addPostFeedback: (postId: string, comment: string, approved: boolean) => void;
   dispatchToMakeWebhook: (post: Post) => Promise<{ success: boolean; message: string }>;
+  setWorkspaceWebhookUrl: (workspaceId: string, url: string) => void;
   theme: 'dark' | 'light';
   toggleTheme: () => void;
   resetToOfficialOctoberCalendar: () => void;
@@ -65,8 +66,9 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
       if (sp && sp.id) {
         if (map.has(sp.id)) {
           const base = map.get(sp.id)!;
-          // Fusion intelligente des médias : préserve les visuels officiels
-          const mergedMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
+          // Fusion intelligente des médias : retire les affiches pré-générées pour laisser place aux imports réels
+          const rawMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
+          const mergedMedia = (rawMedia || []).filter((url: string) => !url.startsWith('/posts/mehdi/'));
           // Si le post 1 de Méhdi était resté au 22 octobre, migration vers le vendredi 23 octobre
           const mergedDate = (base.id === 'mehdi-post-1-presentation' && sp.scheduledDate === '2026-10-22')
             ? base.scheduledDate
@@ -146,14 +148,18 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         if (wsParam) {
           const found = DEFAULT_WORKSPACES.find(w => w.id === wsParam);
           if (found) {
-            setActiveWorkspaceState(found);
+            const savedWebhook = localStorage.getItem(`postpilot_webhook_${found.id}`) || localStorage.getItem('postpilot_linkedin_webhook_url');
+            setActiveWorkspaceState(savedWebhook ? { ...found, webhookUrl: savedWebhook } : found);
             localStorage.setItem(STORAGE_KEY_WORKSPACE, found.id);
           }
         } else {
           const savedWorkspaceId = localStorage.getItem(STORAGE_KEY_WORKSPACE);
           if (savedWorkspaceId) {
             const found = DEFAULT_WORKSPACES.find(w => w.id === savedWorkspaceId);
-            if (found) setActiveWorkspaceState(found);
+            if (found) {
+              const savedWebhook = localStorage.getItem(`postpilot_webhook_${found.id}`) || localStorage.getItem('postpilot_linkedin_webhook_url');
+              setActiveWorkspaceState(savedWebhook ? { ...found, webhookUrl: savedWebhook } : found);
+            }
           }
         }
       } catch {
@@ -272,7 +278,25 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
     setActiveWorkspaceState(workspace);
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEY_WORKSPACE, workspace.id);
+      if (workspace.webhookUrl) {
+        localStorage.setItem(`postpilot_webhook_${workspace.id}`, workspace.webhookUrl);
+        localStorage.setItem('postpilot_linkedin_webhook_url', workspace.webhookUrl);
+      }
     }
+  };
+
+  const setWorkspaceWebhookUrl = (workspaceId: string, url: string) => {
+    const trimmed = url.trim();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(`postpilot_webhook_${workspaceId}`, trimmed);
+      localStorage.setItem('postpilot_linkedin_webhook_url', trimmed);
+    }
+    setActiveWorkspaceState(prev => {
+      if (prev.id === workspaceId) {
+        return { ...prev, webhookUrl: trimmed };
+      }
+      return prev;
+    });
   };
 
   const updatePostStatus = (postId: string, status: PostStatus) => {
@@ -547,6 +571,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         importPosts,
         addPostFeedback,
         dispatchToMakeWebhook,
+        setWorkspaceWebhookUrl,
         theme,
         toggleTheme,
         resetToOfficialOctoberCalendar,
