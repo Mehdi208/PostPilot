@@ -11,6 +11,27 @@ export async function POST(req: NextRequest) {
 
     const webhookUrl = process.env.MAKE_WEBHOOK_URL;
 
+    const baseUrl = 'https://postpilot-three-delta.vercel.app';
+    const fallbackMap: Record<string, string> = {
+      'mehdi-post-1-presentation': `${baseUrl}/posts/mehdi/post-1-presentation.jpg`,
+      'mehdi-post-2-article': `${baseUrl}/posts/mehdi/post-2-article-ia.jpg`,
+      'mehdi-post-3-carrousel': `${baseUrl}/posts/mehdi/post-3-carrousel-5p.jpg`,
+      'mehdi-post-4-libre': `${baseUrl}/posts/mehdi/post-4-libre-cafe.jpg`,
+    };
+
+    const cleanMediaUrls = (post.mediaUrls || []).map((url: string) => {
+      if (!url) return '';
+      if (url.startsWith('data:')) {
+        return fallbackMap[post.id || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
+      }
+      if (url.startsWith('/')) {
+        return `${baseUrl}${url}`;
+      }
+      return url;
+    }).filter(Boolean);
+
+    const firstImageUrl = cleanMediaUrls[0] || fallbackMap[post.id || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
+
     const payload = {
       event: event || 'post.approved',
       workspace: workspace || 'fruithe',
@@ -21,9 +42,10 @@ export async function POST(req: NextRequest) {
       format: post.format,
       theme: post.theme,
       caption: post.caption,
+      imageUrl: firstImageUrl,
       featuredProduct: post.featuredProduct,
       cta: post.cta,
-      mediaUrls: post.mediaUrls,
+      mediaUrls: cleanMediaUrls.length > 0 ? cleanMediaUrls : [firstImageUrl],
       dispatchedAt: new Date().toISOString(),
     };
 

@@ -88,6 +88,29 @@ export async function POST(req: NextRequest) {
 
     // 2. Si un Webhook Make.com / Zapier / N8N est renseigné
     if (effectiveWebhookUrl && effectiveWebhookUrl.startsWith('http')) {
+      const baseUrl = 'https://postpilot-three-delta.vercel.app';
+      
+      const fallbackMap: Record<string, string> = {
+        'mehdi-post-1-presentation': `${baseUrl}/posts/mehdi/post-1-presentation.jpg`,
+        'mehdi-post-2-article': `${baseUrl}/posts/mehdi/post-2-article-ia.jpg`,
+        'mehdi-post-3-carrousel': `${baseUrl}/posts/mehdi/post-3-carrousel-5p.jpg`,
+        'mehdi-post-4-libre': `${baseUrl}/posts/mehdi/post-4-libre-cafe.jpg`,
+      };
+
+      const cleanMediaUrls = (mediaUrls || []).map((url: string) => {
+        if (!url) return '';
+        // Évite l'erreur 414 Request-URI Too Large provoquée par des Data URLs Base64 géantes
+        if (url.startsWith('data:')) {
+          return fallbackMap[postId || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
+        }
+        if (url.startsWith('/')) {
+          return `${baseUrl}${url}`;
+        }
+        return url;
+      }).filter(Boolean);
+
+      const firstImageUrl = cleanMediaUrls[0] || fallbackMap[postId || ''] || `${baseUrl}/posts/mehdi/post-1-presentation.jpg`;
+
       const payload = {
         action: 'publish_linkedin',
         platform: 'linkedin',
@@ -95,7 +118,8 @@ export async function POST(req: NextRequest) {
         workspaceId,
         theme,
         caption,
-        mediaUrls: mediaUrls || [],
+        imageUrl: firstImageUrl,
+        mediaUrls: cleanMediaUrls.length > 0 ? cleanMediaUrls : [firstImageUrl],
         publishedAt: new Date().toISOString(),
       };
 
