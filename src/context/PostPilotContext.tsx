@@ -38,7 +38,7 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v8';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v9';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 // Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
@@ -188,9 +188,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         // ignore
       }
 
-      // Lecture v8 ou versions antérieures
+      // Lecture v9 ou versions antérieures
       const rawStored = 
         localStorage.getItem(STORAGE_KEY_POSTS) || 
+        localStorage.getItem('postpilot_posts_v8') || 
         localStorage.getItem('postpilot_posts_v7') || 
         localStorage.getItem('postpilot_posts_v6') || 
         localStorage.getItem('postpilot_posts_v5') || 
@@ -215,6 +216,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
 
       // Nettoie les anciennes clés de localStorage pour libérer le quota
+      localStorage.removeItem('postpilot_posts_v8');
       localStorage.removeItem('postpilot_posts_v7');
       localStorage.removeItem('postpilot_posts_v6');
       localStorage.removeItem('postpilot_posts_v5');
