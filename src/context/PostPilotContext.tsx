@@ -120,7 +120,7 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
 export function PostPilotProvider({ children }: { children: React.ReactNode }) {
   const [workspaces] = useState<Workspace[]>(DEFAULT_WORKSPACES);
   const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace>(DEFAULT_WORKSPACES[0]);
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Post[]>(() => getInitialOctoberPosts());
   const [activeView, setActiveView] = useState<'calendar' | 'table' | 'inspiration'>('calendar');
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   const [selectedWeek, setSelectedWeek] = useState<string>('all');

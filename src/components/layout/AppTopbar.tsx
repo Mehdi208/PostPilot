@@ -125,9 +125,9 @@ export default function AppTopbar() {
               })}
             </div>
 
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2 whitespace-nowrap shrink-0">
               <span className="text-zinc-300 dark:text-zinc-700">•</span>
-              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
+              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight whitespace-nowrap">
                 Octobre — Novembre 2026
               </span>
               <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
