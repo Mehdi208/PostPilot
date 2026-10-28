@@ -38,7 +38,7 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v7';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v8';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 // Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
@@ -51,7 +51,7 @@ function getInitialOctoberPosts(): Post[] {
 }
 
 // Fusion auto-réparatrice : garantit que toutes les publications de base sont toujours présentes,
-// tout en synchronisant les dates officielles selon le rythme 1 post / semaine du professeur.
+// tout en synchronisant les dates officielles selon le rythme 2 posts / semaine choisi par l'utilisateur.
 function mergeWithInitialPosts(savedList: Post[]): Post[] {
   const basePosts = getInitialOctoberPosts();
   const map = new Map<string, Post>();
@@ -60,21 +60,27 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
   basePosts.forEach(p => map.set(p.id, p));
 
   // 2. Superpose les modifications sauvegardées sans écraser le workspaceId d'origine,
-  // et en assurant la synchronisation des dates officielles de Méhdi Traoré
+  // et en assurant la synchronisation des dates et légendes officielles de Méhdi Traoré
   if (Array.isArray(savedList)) {
     savedList.forEach(sp => {
       if (sp && sp.id) {
         if (map.has(sp.id)) {
           const base = map.get(sp.id)!;
-          const mergedMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
           
-          // Pour les posts de Méhdi Traoré, on synchronise directement avec le planning hebdomadaire officiel du professeur
+          // Pour les posts de Méhdi Traoré, on synchronise directement avec le planning 2 posts/semaine
           const isMehdi = base.workspaceId === 'mehdi-traore';
           const scheduledDate = isMehdi ? base.scheduledDate : (sp.scheduledDate || base.scheduledDate);
           const dayOfWeek = isMehdi ? base.dayOfWeek : (sp.dayOfWeek || base.dayOfWeek);
           const week = isMehdi ? base.week : (sp.week || base.week);
           const time = isMehdi ? (base.time || '08:30') : (sp.time || base.time);
           const status = (isMehdi && base.id === 'mehdi-post-1-presentation') ? 'published' : (sp.status || base.status);
+          const caption = isMehdi ? base.caption : (sp.caption || base.caption);
+          const theme = isMehdi ? base.theme : (sp.theme || base.theme);
+
+          // Conserve l'affiche officielle du post 1, et pour les autres posts, conserve les médias importés par l'utilisateur
+          const mergedMedia = (isMehdi && base.id === 'mehdi-post-1-presentation')
+            ? (sp.mediaUrls && sp.mediaUrls.length > 0 ? sp.mediaUrls : base.mediaUrls)
+            : (sp.mediaUrls || []);
 
           map.set(sp.id, {
             ...base,
@@ -86,6 +92,8 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
             week,
             time,
             status,
+            caption,
+            theme,
             aiVisualPrompt: sp.aiVisualPrompt || base.aiVisualPrompt,
             aiPromptSources: (sp.aiPromptSources && sp.aiPromptSources.length > 0) ? sp.aiPromptSources : base.aiPromptSources,
             inspirationUrls: (sp.inspirationUrls && sp.inspirationUrls.length > 0) ? sp.inspirationUrls : base.inspirationUrls,
@@ -180,9 +188,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         // ignore
       }
 
-      // Lecture v7 ou versions antérieures
+      // Lecture v8 ou versions antérieures
       const rawStored = 
         localStorage.getItem(STORAGE_KEY_POSTS) || 
+        localStorage.getItem('postpilot_posts_v7') || 
         localStorage.getItem('postpilot_posts_v6') || 
         localStorage.getItem('postpilot_posts_v5') || 
         localStorage.getItem('postpilot_posts_v4') || 
@@ -206,6 +215,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
 
       // Nettoie les anciennes clés de localStorage pour libérer le quota
+      localStorage.removeItem('postpilot_posts_v7');
       localStorage.removeItem('postpilot_posts_v6');
       localStorage.removeItem('postpilot_posts_v5');
       localStorage.removeItem('postpilot_posts_v4');
@@ -509,12 +519,17 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
 
   const dispatchToMakeWebhook = async (post: Post): Promise<{ success: boolean; message: string }> => {
     try {
+      const savedWebhook = typeof window !== 'undefined'
+        ? (localStorage.getItem('postpilot_linkedin_webhook_url') || localStorage.getItem(`postpilot_webhook_${post.workspaceId}`) || activeWorkspace.webhookUrl || '')
+        : '';
+
       const response = await fetch('/api/webhook/dispatch', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event: 'post.approved',
-          workspace: activeWorkspace.id,
+          workspace: post.workspaceId || activeWorkspace.id,
+          webhookUrl: savedWebhook,
           post,
         }),
       });

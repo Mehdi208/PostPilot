@@ -1,5 +1,5 @@
 // PostPilot PWA Service Worker — Enterprise Offline & Shell Cache
-const CACHE_NAME = 'postpilot-pwa-v6';
+const CACHE_NAME = 'postpilot-pwa-v7';
 const OFFLINE_FALLBACK = '/';
 
 const PRECACHE_ASSETS = [

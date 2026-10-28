@@ -44,18 +44,27 @@ export default function LinkedInPublishModal({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = 
+        localStorage.getItem('postpilot_linkedin_webhook_url') || 
         activeWorkspace.webhookUrl || 
         localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) || 
-        localStorage.getItem('postpilot_linkedin_webhook_url') || 
+        localStorage.getItem(`postpilot_webhook_${post.workspaceId}`) || 
         '';
-      setWebhookUrl(saved);
+      if (saved) {
+        setWebhookUrl(saved);
+      }
     }
-  }, [activeWorkspace.id, activeWorkspace.webhookUrl]);
+  }, [activeWorkspace.id, activeWorkspace.webhookUrl, post.workspaceId]);
 
   if (!isOpen) return null;
 
   const handleWebhookChange = (val: string) => {
+    const trimmed = val.trim();
     setWebhookUrl(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('postpilot_linkedin_webhook_url', trimmed);
+      localStorage.setItem(`postpilot_webhook_${activeWorkspace.id}`, trimmed);
+      localStorage.setItem(`postpilot_webhook_${post.workspaceId}`, trimmed);
+    }
     setWorkspaceWebhookUrl(activeWorkspace.id, val);
   };
 
@@ -92,7 +101,7 @@ export default function LinkedInPublishModal({
 
   const handleSendViaWebhook = async () => {
     const effectiveUrl = webhookUrl.trim() || 
-      (typeof window !== 'undefined' ? (localStorage.getItem('postpilot_linkedin_webhook_url') || localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) || '') : '');
+      (typeof window !== 'undefined' ? (localStorage.getItem('postpilot_linkedin_webhook_url') || localStorage.getItem(`postpilot_webhook_${activeWorkspace.id}`) || localStorage.getItem(`postpilot_webhook_${post.workspaceId}`) || '') : '');
 
     if (!effectiveUrl) {
       setStatusMessage({
@@ -102,7 +111,12 @@ export default function LinkedInPublishModal({
       return;
     }
 
-    // Sauvegarde persistante immédiate
+    // Sauvegarde persistante immédiate sur toutes les clés
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('postpilot_linkedin_webhook_url', effectiveUrl);
+      localStorage.setItem(`postpilot_webhook_${activeWorkspace.id}`, effectiveUrl);
+      localStorage.setItem(`postpilot_webhook_${post.workspaceId}`, effectiveUrl);
+    }
     setWorkspaceWebhookUrl(activeWorkspace.id, effectiveUrl);
 
     setIsSubmitting(true);

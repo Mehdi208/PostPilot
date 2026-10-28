@@ -11,7 +11,10 @@ import {
   Check,
   RotateCcw,
   List,
-  Grid
+  Grid,
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon
 } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
@@ -58,20 +61,57 @@ export default function MonthCalendarView() {
   // Mode d'affichage mobile : 'agenda' (liste chronologique lisible) ou 'grid' (grille condensée)
   const [mobileCalendarMode, setMobileCalendarMode] = useState<'agenda' | 'grid'>('agenda');
   const [selectedMobileDate, setSelectedMobileDate] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<'2026-10' | '2026-11'>('2026-10');
+  
+  // Navigation dynamique mois par mois avec flèches et swipe (par défaut : Octobre 2026)
+  const [currentDate, setCurrentDate] = useState<Date>(() => new Date(2026, 9, 1));
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
 
-  // Calcul dynamique selon le mois sélectionné (Octobre ou Novembre 2026)
-  const isNov = selectedMonth === '2026-11';
-  const totalDaysInMonth = isNov ? 30 : 31;
-  // 1er Octobre 2026 = Jeudi (offset 3)
-  // 1er Novembre 2026 = Dimanche (offset 6)
-  const startDayOffset = isNov ? 6 : 3;
+  const curYear = currentDate.getFullYear();
+  const curMonthIndex = currentDate.getMonth(); // 0-indexed (9 = Octobre)
+  const selectedMonth = `${curYear}-${String(curMonthIndex + 1).padStart(2, '0')}`;
+
+  // Libellé en français avec première lettre majuscule (ex: "Octobre 2026", "Novembre 2026")
+  const rawMonthName = currentDate.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+  const formattedMonthLabel = rawMonthName.charAt(0).toUpperCase() + rawMonthName.slice(1);
+
+  // Nombre total de jours dans le mois en cours
+  const totalDaysInMonth = new Date(curYear, curMonthIndex + 1, 0).getDate();
+
+  // Premier jour du mois : Lundi = 0, ..., Dimanche = 6
+  const firstDayOfWeek = new Date(curYear, curMonthIndex, 1).getDay();
+  const startDayOffset = (firstDayOfWeek + 6) % 7;
+
+  const handlePrevMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+    setSelectedMobileDate(null);
+  };
+
+  const handleNextMonth = () => {
+    setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+    setSelectedMobileDate(null);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (diff > 50) {
+      handleNextMonth();
+    } else if (diff < -50) {
+      handlePrevMonth();
+    }
+    setTouchStartX(null);
+  };
 
   // Bandeau swipeable mobile de tous les jours du mois sélectionné
   const daysShort = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
   const allDaysOfMonth = Array.from({ length: totalDaysInMonth }, (_, i) => {
     const dayNum = i + 1;
-    const dateObj = new Date(2026, isNov ? 10 : 9, dayNum);
+    const dateObj = new Date(curYear, curMonthIndex, dayNum);
     const shortDay = daysShort[dateObj.getDay()];
     const dateStr = `${selectedMonth}-${String(dayNum).padStart(2, '0')}`;
     const dayPosts = filteredPosts.filter(p => p.scheduledDate === dateStr);
@@ -155,7 +195,7 @@ export default function MonthCalendarView() {
     setJustMovedPostId(targetPostId);
 
     const [,, dayNum] = dateStr.split('-');
-    setToastMessage(`Publication « ${post.theme} » déplacée au ${parseInt(dayNum, 10)} octobre`);
+    setToastMessage(`Publication « ${post.theme} » déplacée au ${parseInt(dayNum, 10)} ${formattedMonthLabel}`);
 
     setTimeout(() => setJustMovedPostId(null), 2500);
     setTimeout(() => setToastMessage(null), 3500);
@@ -178,26 +218,30 @@ export default function MonthCalendarView() {
       {/* ============================================================ */}
       {/* 📱 SECTION MOBILE (md:hidden) : Vue Agenda & Bandeau Swipeable */}
       {/* ============================================================ */}
-      <div className="md:hidden flex-1 flex flex-col overflow-hidden space-y-2.5">
+      <div className="md:hidden flex-1 flex flex-col overflow-hidden space-y-2.5" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
         
-        {/* Barre supérieure mobile : Mois toggle + Mode toggle + Reset */}
+        {/* Barre supérieure mobile : Mois fléché (swipe) + Mode toggle */}
         <div className="flex items-center justify-between gap-2 bg-zinc-50 dark:bg-zinc-950 p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
           <div className="flex items-center gap-1 bg-zinc-200 dark:bg-zinc-800 p-0.5 rounded-md text-[11px] font-semibold">
             <button
-              onClick={() => { setSelectedMonth('2026-10'); setSelectedMobileDate(null); }}
-              className={`px-2 py-0.5 rounded transition-all ${
-                selectedMonth === '2026-10' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
-              }`}
+              onClick={handlePrevMonth}
+              aria-label="Mois précédent"
+              className="p-1 rounded hover:bg-white dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-all cursor-pointer"
             >
-              Octobre ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-10')).length})
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
+            <span className="px-1.5 font-bold text-zinc-950 dark:text-white select-none">
+              {formattedMonthLabel}
+              <span className="ml-1 text-[10px] font-mono text-zinc-500 font-normal">
+                ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith(selectedMonth)).length})
+              </span>
+            </span>
             <button
-              onClick={() => { setSelectedMonth('2026-11'); setSelectedMobileDate(null); }}
-              className={`px-2 py-0.5 rounded transition-all ${
-                selectedMonth === '2026-11' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
-              }`}
+              onClick={handleNextMonth}
+              aria-label="Mois suivant"
+              className="p-1 rounded hover:bg-white dark:hover:bg-zinc-900 text-zinc-700 dark:text-zinc-300 transition-all cursor-pointer"
             >
-              Novembre ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-11')).length})
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -482,35 +526,34 @@ export default function MonthCalendarView() {
               <span>Aujourd&apos;hui : Mercredi 28 Octobre 2026</span>
             </div>
 
-            {/* Sélecteur de Mois Octobre / Novembre */}
-            <div className="flex items-center bg-zinc-200/80 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+            {/* Sélecteur de Mois avec boutons fléchés Précédent / Suivant (Swipe) */}
+            <div className="flex items-center gap-1 bg-zinc-200/80 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
               <button
                 type="button"
-                onClick={() => setSelectedMonth('2026-10')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  selectedMonth === '2026-10'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-bold'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
-                }`}
+                onClick={handlePrevMonth}
+                aria-label="Mois précédent"
+                className="p-1 rounded-md hover:bg-white dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all cursor-pointer"
+                title="Mois précédent"
               >
-                Octobre 2026
-                <span className="ml-1 text-[10px] font-mono opacity-70">
-                  ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-10')).length})
-                </span>
+                <ChevronLeft className="w-4 h-4" />
               </button>
+
+              <div className="px-3 py-1 text-xs font-bold text-zinc-900 dark:text-zinc-100 flex items-center gap-1.5 select-none min-w-[140px] justify-center">
+                <CalendarIcon className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                <span>{formattedMonthLabel}</span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-zinc-300/80 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-normal">
+                  {filteredPosts.filter(p => (p.scheduledDate || '').startsWith(selectedMonth)).length}
+                </span>
+              </div>
+
               <button
                 type="button"
-                onClick={() => setSelectedMonth('2026-11')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
-                  selectedMonth === '2026-11'
-                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-bold'
-                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
-                }`}
+                onClick={handleNextMonth}
+                aria-label="Mois suivant"
+                className="p-1 rounded-md hover:bg-white dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all cursor-pointer"
+                title="Mois suivant"
               >
-                Novembre 2026
-                <span className="ml-1 text-[10px] font-mono opacity-70">
-                  ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-11')).length})
-                </span>
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
           </div>

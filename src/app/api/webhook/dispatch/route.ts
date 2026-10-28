@@ -4,13 +4,13 @@ import { resolvePublicMediaUrls } from '@/lib/utils/media-url';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { event, workspace, post } = body;
+    const { event, workspace, post, webhookUrl: clientWebhookUrl } = body;
 
     if (!post) {
       return NextResponse.json({ error: 'Post data is missing' }, { status: 400 });
     }
 
-    const webhookUrl = process.env.MAKE_WEBHOOK_URL;
+    const webhookUrl = clientWebhookUrl || process.env.MAKE_WEBHOOK_URL;
     const baseUrl = process.env.APP_BASE_URL || 'https://postpilot-three-delta.vercel.app';
 
     // Résolution publique des médias réels sans aucun fallback vers d'anciennes affiches

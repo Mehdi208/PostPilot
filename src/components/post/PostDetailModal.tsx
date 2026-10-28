@@ -157,7 +157,7 @@ export default function PostDetailModal() {
     setUploadProgress(10);
 
     try {
-      const newUrls: string[] = [...formData.mediaUrls];
+      const uploadedUrls: string[] = [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -168,8 +168,11 @@ export default function PostDetailModal() {
           (percent) => setUploadProgress(percent),
           formData.scheduledDate
         );
-        newUrls.push(uploadedUrl);
+        uploadedUrls.push(uploadedUrl);
       }
+
+      // Le nouveau visuel importé par l'utilisateur passe immédiatement en tête (prioritaire pour LinkedIn/Make)
+      const newUrls = [...uploadedUrls, ...formData.mediaUrls.filter(u => !uploadedUrls.includes(u))];
 
       setFormData((prev) => (prev ? { ...prev, mediaUrls: newUrls } : prev));
       setUploadProgress(null);
