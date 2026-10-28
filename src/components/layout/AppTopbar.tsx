@@ -128,7 +128,7 @@ export default function AppTopbar() {
             <div className="hidden lg:flex items-center gap-2">
               <span className="text-zinc-300 dark:text-zinc-700">•</span>
               <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 tracking-tight">
-                Octobre 2026
+                Octobre — Novembre 2026
               </span>
               <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400">
                 {totalCount} posts

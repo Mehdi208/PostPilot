@@ -338,7 +338,7 @@
   {
     "id": "mehdi-post-1-presentation",
     "workspaceId": "mehdi-traore",
-    "week": "S3",
+    "week": "S1",
     "scheduledDate": "2026-10-23",
     "dayOfWeek": "Ven.",
     "time": "08:30",
@@ -351,7 +351,7 @@
     "caption": "On me demande souvent : « Méhdi, tu es dans la communication ou dans la tech ? »\n\nMa réponse : exactement au milieu. 🎯\n\nAujourd’hui, une stratégie marketing sans maîtrise des outils digitaux n’est qu’une intention. Et un outil technologique sans storytelling percutant reste invisible.\n\nPour ceux qui me découvrent ici, enchanté : je m’appelle Abdou-Rahmane Méhdi Traoré.\n\nPassionné par la communication digitale, la création de contenu stratégique et l’ingénierie web, j’aide les marques et les institutions à transformer leur présence en ligne en levier de croissance concret.\n\nMon parcours en quelques repères :\n🎓 Major de promotion à l’IFRAN (Institut de Formation aux Nouvelles Technologies d'Abidjan) en Licence Communication Digitale.\n🏛️ Ex-Président du Bureau Des Étudiants (BDE IFRAN) : gouvernance de 9 clubs, 8 événements majeurs et digitalisation des services étudiants (BDE Connect, Cantine Connectée).\n💼 Consultant & Stratège Social Media : +10 marques et institutions accompagnées (FruiThé Abidjan, Cabinet Hourya, BioGroup Africa, Phénix Real Estate, MUFEMCI...).\n💻 Concepteur & Bâtisseur : créateur d’outils web et de dashboards de pilotage (dont PostPilot, l’OS de gestion pour Community Managers).\n\nCe qui m’anime au quotidien ?\nComprendre la psychologie d’une audience, concevoir des récits qui captivent et bâtir des systèmes automatisés qui font gagner du temps aux équipes.\n\n👉 Et vous, quelle est la compétence inattendue qui fait votre force dans votre métier ?\nDiscutons-en en commentaire ! 👇\n\n#CommunicationDigitale #PersonalBranding #Storytelling #TechAndCom #IFRAN #Abidjan #LinkedInCreators",
     "featuredProduct": "Audit Stratégique & Personal Branding",
     "cta": "Partagez votre compétence hybride en commentaire",
-    "status": "approved",
+    "status": "published",
     "creativeBrief": "Photo portrait pro studio de Méhdi, chaleureux, regard direct, texte discret « Méhdi Traoré | Stratégie Digitale & Tech »",
     "mediaUrls": [],
     "orderIndex": 17,
@@ -370,9 +370,9 @@
   {
     "id": "mehdi-post-2-article",
     "workspaceId": "mehdi-traore",
-    "week": "S4",
-    "scheduledDate": "2026-10-27",
-    "dayOfWeek": "Mar.",
+    "week": "S2",
+    "scheduledDate": "2026-10-29",
+    "dayOfWeek": "Jeu.",
     "time": "08:30",
     "platforms": [
       "linkedin"
@@ -383,7 +383,7 @@
     "caption": "[ARTICLE DE FOND] 🧠 L'IA va-t-elle tuer le Community Management ou révéler une élite de stratèges ?\n\nDepuis l'irruption fracassante des modèles génératifs comme ChatGPT, Gemini ou Midjourney, un frisson d'inquiétude parcourt les métiers du web : beaucoup annoncent la disparition pure et simple du Community Manager, réduit selon certains à un simple pousseur de boutons désormais automatisable en un clic. Pourtant, cette angoisse repose sur une confusion fondamentale entre l'exécution mécanique et la véritable intelligence de communication. Si générer un texte générique ou une image standardisée ne prend plus que trois secondes, la véritable problématique à laquelle les marques font face en 2026 n'a jamais été aussi complexe : dans un océan digital saturé de contenus robotisés sans saveur, comment capter encore l'attention humaine, tisser un lien émotionnel sincère et susciter une réelle adhésion communautaire ?\n\nLa réponse réside dans la mutation inévitable de notre discipline : l'intelligence artificielle ne tue pas le Community Manager, elle élimine le CM exécutant pour donner naissance au « Community Architect » hybride. En automatisant les tâches à faible valeur ajoutée (recherche documentaire, déclinaisons de formats, calendrier brut), l'IA offre aux communicants une opportunité historique de réinvestir leur véritable cœur de métier : la compréhension fine des codes culturels locaux (comme le lifestyle et les subtilités relationnelles à Abidjan), la psychologie des foules, l'art du storytelling narratif et l'orchestration stratégique de la marque. Chez FruiThé ou dans mes missions de conseil, j'ai constaté qu'un algorithme peut aligner des mots-clés, mais qu'il est incapable de percevoir l'ironie subtile d'une tendance locale, de désamorcer une crise de réputation avec empathie ou d'insuffler une âme authentique à une communauté. L'IA n'est pas un substitut, c'est un amplificateur cognitif : elle rend les mauvais rédacteurs plus bruyants, et les stratèges brillants infiniment plus puissants.\n\nDès lors, cette transformation nous amène à une réflexion plus vaste et vertigineuse : si la valeur de la communication ne se mesure plus à la quantité d'heures passées à rédiger mais à la singularité de la pensée humaine, comment nos écoles et nos universités doivent-elles réinventer la formation des futurs diplômés ? Devons-nous continuer à enseigner des règles de rédaction prévisibles, ou plutôt développer l'esprit critique, la maîtrise des architectures de données, l'éthique algorithmique et le génie relationnel ?\n\nLa parole est à vous : dans votre secteur, l'IA a-t-elle déjà redéfini vos priorités stratégiques ?\n\n#IntelligenceArtificielle #CommunityManagement #StrategieDigitale #FuturDuTravail #MarketingB2B #AfriqueTech",
     "featuredProduct": "Thought Leadership B2B",
     "cta": "Partagez votre avis en commentaire : opportunité ou menace ?",
-    "status": "approved",
+    "status": "scheduled",
     "creativeBrief": "Bannière éditoriale typographique « IA vs Humain : Quel futur pour le Community Management ? »",
     "mediaUrls": [],
     "orderIndex": 18,
@@ -402,8 +402,8 @@
   {
     "id": "mehdi-post-3-carrousel",
     "workspaceId": "mehdi-traore",
-    "week": "S4",
-    "scheduledDate": "2026-10-29",
+    "week": "S3",
+    "scheduledDate": "2026-11-05",
     "dayOfWeek": "Jeu.",
     "time": "08:30",
     "platforms": [
@@ -415,7 +415,7 @@
     "caption": "90% des posts LinkedIn échouent pour une seule raison : ils parlent de l'auteur au lieu de parler du lecteur. 📑\n\nAprès avoir rédigé et analysé des centaines de publications pour plus de 10 marques et pour mon propre compte, j'ai synthétisé un framework reproductible en 5 étapes.\n\nJe l'appelle la méthode des « 5 P » :\n\n1️⃣ PROBLÈME (Slide 2) : Nommez la frustration exacte de votre cible dès la première ligne.\n2️⃣ PERSPECTIVE (Slide 3) : Cassez une idée reçue ou apportez un angle neuf et contre-intuitif.\n3️⃣ PREUVE (Slide 4) : Appuyez votre propos avec un chiffre réel, un cas client ou une métrique concrète.\n4️⃣ PLAN (Slide 5) : Déroulez 3 actions actionnables que le lecteur peut appliquer dès aujourd'hui.\n5️⃣ PASSE À L'ACTION (Slide 6) : Posez UNE seule question engageante ou un appel au clic limpide.\n\n👉 Faites défiler le carrousel PDF ci-dessous pour voir chaque étape illustrée avec des exemples avant/après concrets.\n\n💡 Conseil bonus : enregistrez ce document pour votre prochaine session de rédaction.\n\nLequel de ces 5 P avez-vous tendance à oublier le plus souvent ?\n\n#Copywriting #LinkedInTips #ContentMarketing #SocialMediaStrategy #CarrouselLinkedIn #Croissance",
     "featuredProduct": "Guide Copywriting 5P (PDF)",
     "cta": "Téléchargez le document PDF et donnez votre avis",
-    "status": "approved",
+    "status": "scheduled",
     "creativeBrief": "Carrousel PDF 6 slides au ratio 4:5 (1080x1350) noir & blanc minimaliste avec touches d'indigo",
     "mediaUrls": [],
     "orderIndex": 19,
@@ -435,9 +435,9 @@
     "id": "mehdi-post-4-libre",
     "workspaceId": "mehdi-traore",
     "week": "S4",
-    "scheduledDate": "2026-10-31",
-    "dayOfWeek": "Sam.",
-    "time": "10:00",
+    "scheduledDate": "2026-11-12",
+    "dayOfWeek": "Jeu.",
+    "time": "08:30",
     "platforms": [
       "linkedin"
     ],
@@ -447,7 +447,7 @@
     "caption": "07h15. Le calme avant la tempête. ☕💻\n\nSur LinkedIn, on a souvent tendance à ne montrer que les victoires : les mentions « Major de promo », les dashboards qui montent, les contrats signés et les événements réussis.\n\nMais la réalité du quotidien ressemble plutôt à cette photo :\nUne tasse de café fumante, deux fenêtres de code ouvertes à gauche, un calendrier éditorial à valider à droite, et un bloc-notes rempli de to-do lists gribouillées.\n\nCes deux dernières années, jongler entre :\n📚 L'exigence académique de ma Licence à l'IFRAN,\n🏛️ La présidence du BDE et la gestion des attentes de centaines d'étudiants,\n💼 Et la responsabilité de livrer des résultats concrets pour des entreprises réelles...\na été l'école la plus intense et formatrice de ma vie.\n\nOn me demande souvent le secret. Il n'y en a pas :\nCe n'est ni du génie ni de la chance. C'est de la discipline brute, la passion d'apprendre chaque jour, et surtout l'acceptation que certaines journées sont plus dures que d'autres.\n\nPrendre 15 minutes le matin pour respirer, regarder le chemin parcouru et se rappeler pourquoi on a commencé, c'est ce qui permet de tenir la distance.\n\nÀ tous les étudiants-entrepreneurs, les freelances et les passionnés qui construisent leurs projets dans l'ombre : force à vous pour cette journée. Vos efforts d'aujourd'hui sont vos victoires de demain.\n\nEt vous, c'est quoi votre rituel indispensable avant d'attaquer vos grosses journées ?\n\n#RealLife #Entrepreneuriat #Discipline #EtudiantEntrepreneur #BehindTheScenes #Motivation #Abidjan",
     "featuredProduct": "Lifestyle & Discipline Entrepreneuriale",
     "cta": "Partagez votre rituel du matin en commentaire",
-    "status": "approved",
+    "status": "scheduled",
     "creativeBrief": "Photo réelle du bureau avec PostPilot sur écran d'ordinateur portable, café fumant et carnet de notes",
     "mediaUrls": [],
     "orderIndex": 20,

@@ -58,24 +58,29 @@ export default function MonthCalendarView() {
   // Mode d'affichage mobile : 'agenda' (liste chronologique lisible) ou 'grid' (grille condensée)
   const [mobileCalendarMode, setMobileCalendarMode] = useState<'agenda' | 'grid'>('agenda');
   const [selectedMobileDate, setSelectedMobileDate] = useState<string | null>(null);
+  const [selectedMonth, setSelectedMonth] = useState<'2026-10' | '2026-11'>('2026-10');
 
-  const totalDaysInMonth = 31;
-  const startDayOffset = 3; // Jeudi 1er octobre 2026 (Lun=0, Mar=1, Mer=2, Jeu=3)
+  // Calcul dynamique selon le mois sélectionné (Octobre ou Novembre 2026)
+  const isNov = selectedMonth === '2026-11';
+  const totalDaysInMonth = isNov ? 30 : 31;
+  // 1er Octobre 2026 = Jeudi (offset 3)
+  // 1er Novembre 2026 = Dimanche (offset 6)
+  const startDayOffset = isNov ? 6 : 3;
 
-  // Bandeau swipeable mobile de tous les jours d'Octobre
+  // Bandeau swipeable mobile de tous les jours du mois sélectionné
   const daysShort = ['Dim.', 'Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.'];
-  const allDaysOfOctober = Array.from({ length: totalDaysInMonth }, (_, i) => {
+  const allDaysOfMonth = Array.from({ length: totalDaysInMonth }, (_, i) => {
     const dayNum = i + 1;
-    const dateObj = new Date(2026, 9, dayNum);
+    const dateObj = new Date(2026, isNov ? 10 : 9, dayNum);
     const shortDay = daysShort[dateObj.getDay()];
-    const dateStr = `2026-10-${String(dayNum).padStart(2, '0')}`;
+    const dateStr = `${selectedMonth}-${String(dayNum).padStart(2, '0')}`;
     const dayPosts = filteredPosts.filter(p => p.scheduledDate === dateStr);
     return { dayNum, shortDay, dateStr, dayPosts };
   });
 
   const displayedMobilePosts = selectedMobileDate
     ? filteredPosts.filter(p => p.scheduledDate === selectedMobileDate)
-    : [...filteredPosts].sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
+    : [...filteredPosts].filter(p => p.scheduledDate.startsWith(selectedMonth)).sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
 
   const calendarCells: { dayNumber: number | null; dateStr: string | null }[] = [];
 
@@ -87,7 +92,7 @@ export default function MonthCalendarView() {
     const dayFormatted = String(day).padStart(2, '0');
     calendarCells.push({
       dayNumber: day,
-      dateStr: `2026-10-${dayFormatted}`,
+      dateStr: `${selectedMonth}-${dayFormatted}`,
     });
   }
 
@@ -173,11 +178,25 @@ export default function MonthCalendarView() {
       {/* ============================================================ */}
       <div className="md:hidden flex-1 flex flex-col overflow-hidden space-y-2.5">
         
-        {/* Barre supérieure mobile : Aujourd'hui + Mode toggle + Reset */}
+        {/* Barre supérieure mobile : Mois toggle + Mode toggle + Reset */}
         <div className="flex items-center justify-between gap-2 bg-zinc-50 dark:bg-zinc-950 p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 shrink-0">
-          <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-zinc-950 dark:bg-white text-white dark:text-black text-[11px] font-semibold shadow-xs">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Mer. 21 Octobre</span>
+          <div className="flex items-center gap-1 bg-zinc-200 dark:bg-zinc-800 p-0.5 rounded-md text-[11px] font-semibold">
+            <button
+              onClick={() => { setSelectedMonth('2026-10'); setSelectedMobileDate(null); }}
+              className={`px-2 py-0.5 rounded transition-all ${
+                selectedMonth === '2026-10' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
+              }`}
+            >
+              Octobre ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-10')).length})
+            </button>
+            <button
+              onClick={() => { setSelectedMonth('2026-11'); setSelectedMobileDate(null); }}
+              className={`px-2 py-0.5 rounded transition-all ${
+                selectedMonth === '2026-11' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
+              }`}
+            >
+              Novembre ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-11')).length})
+            </button>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -232,7 +251,7 @@ export default function MonthCalendarView() {
                 Tous les posts ({filteredPosts.length})
               </button>
 
-              {allDaysOfOctober.map((dayItem) => {
+              {allDaysOfMonth.map((dayItem) => {
                 const isSelected = selectedMobileDate === dayItem.dateStr;
                 const isDayToday = dayItem.dateStr === todayDateStr;
                 const count = dayItem.dayPosts.length;
@@ -452,15 +471,44 @@ export default function MonthCalendarView() {
         {/* Calendar Context Bar */}
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs bg-zinc-50 dark:bg-zinc-950 p-3 rounded-lg border border-zinc-200 dark:border-zinc-800">
           
-          {/* Left: Repère Aujourd'hui officiel */}
+          {/* Left: Repère Aujourd'hui & Sélecteur de Mois Octobre / Novembre */}
           <div className="flex items-center gap-2.5">
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-zinc-950 dark:bg-white text-white dark:text-black font-semibold text-xs shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Aujourd&apos;hui : Mercredi 21 Octobre 2026</span>
+              <span>Aujourd&apos;hui : Mercredi 28 Octobre 2026</span>
             </div>
-            <span className="text-zinc-500 font-mono text-[11px] hidden sm:inline">
-              • Mois d&apos;Octobre (31 jours)
-            </span>
+
+            {/* Sélecteur de Mois Octobre / Novembre */}
+            <div className="flex items-center bg-zinc-200/80 dark:bg-zinc-900 p-0.5 rounded-lg border border-zinc-200 dark:border-zinc-800">
+              <button
+                type="button"
+                onClick={() => setSelectedMonth('2026-10')}
+                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                  selectedMonth === '2026-10'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-bold'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+              >
+                Octobre 2026
+                <span className="ml-1 text-[10px] font-mono opacity-70">
+                  ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-10')).length})
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedMonth('2026-11')}
+                className={`px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${
+                  selectedMonth === '2026-11'
+                    ? 'bg-white dark:bg-zinc-800 text-zinc-950 dark:text-white shadow-xs font-bold'
+                    : 'text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                }`}
+              >
+                Novembre 2026
+                <span className="ml-1 text-[10px] font-mono opacity-70">
+                  ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-11')).length})
+                </span>
+              </button>
+            </div>
           </div>
 
           {/* Center/Right: Sprints & Hint Drag and Drop & Reset */}

@@ -38,7 +38,7 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v6';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v7';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 // Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
@@ -51,7 +51,7 @@ function getInitialOctoberPosts(): Post[] {
 }
 
 // Fusion auto-réparatrice : garantit que toutes les publications de base sont toujours présentes,
-// tout en conservant les modifications (déplacements de dates, changements de statut, feedbacks client).
+// tout en synchronisant les dates officielles selon le rythme 1 post / semaine du professeur.
 function mergeWithInitialPosts(savedList: Post[]): Post[] {
   const basePosts = getInitialOctoberPosts();
   const map = new Map<string, Post>();
@@ -60,26 +60,32 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
   basePosts.forEach(p => map.set(p.id, p));
 
   // 2. Superpose les modifications sauvegardées sans écraser le workspaceId d'origine,
-  // et en assurant la présence des médias officiels et des dates stratégiques
+  // et en assurant la synchronisation des dates officielles de Méhdi Traoré
   if (Array.isArray(savedList)) {
     savedList.forEach(sp => {
       if (sp && sp.id) {
         if (map.has(sp.id)) {
           const base = map.get(sp.id)!;
-          // Fusion intelligente des médias : retire les affiches pré-générées pour laisser place aux imports réels
-          const rawMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
-          const mergedMedia = (rawMedia || []).filter((url: string) => !url.startsWith('/posts/mehdi/'));
-          // Si le post 1 de Méhdi était resté au 22 octobre, migration vers le vendredi 23 octobre
-          const mergedDate = (base.id === 'mehdi-post-1-presentation' && sp.scheduledDate === '2026-10-22')
-            ? base.scheduledDate
-            : (sp.scheduledDate || base.scheduledDate);
+          const mergedMedia = (sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : base.mediaUrls;
+          
+          // Pour les posts de Méhdi Traoré, on synchronise directement avec le planning hebdomadaire officiel du professeur
+          const isMehdi = base.workspaceId === 'mehdi-traore';
+          const scheduledDate = isMehdi ? base.scheduledDate : (sp.scheduledDate || base.scheduledDate);
+          const dayOfWeek = isMehdi ? base.dayOfWeek : (sp.dayOfWeek || base.dayOfWeek);
+          const week = isMehdi ? base.week : (sp.week || base.week);
+          const time = isMehdi ? (base.time || '08:30') : (sp.time || base.time);
+          const status = (isMehdi && base.id === 'mehdi-post-1-presentation') ? 'published' : (sp.status || base.status);
 
           map.set(sp.id, {
             ...base,
             ...sp,
             workspaceId: base.workspaceId, // Préserve le workspaceId légitime du post de base
             mediaUrls: mergedMedia,
-            scheduledDate: mergedDate,
+            scheduledDate,
+            dayOfWeek,
+            week,
+            time,
+            status,
             aiVisualPrompt: sp.aiVisualPrompt || base.aiVisualPrompt,
             aiPromptSources: (sp.aiPromptSources && sp.aiPromptSources.length > 0) ? sp.aiPromptSources : base.aiPromptSources,
             inspirationUrls: (sp.inspirationUrls && sp.inspirationUrls.length > 0) ? sp.inspirationUrls : base.inspirationUrls,
@@ -166,9 +172,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
         // ignore
       }
 
-      // Lecture v6 ou versions antérieures
+      // Lecture v7 ou versions antérieures
       const rawStored = 
         localStorage.getItem(STORAGE_KEY_POSTS) || 
+        localStorage.getItem('postpilot_posts_v6') || 
         localStorage.getItem('postpilot_posts_v5') || 
         localStorage.getItem('postpilot_posts_v4') || 
         localStorage.getItem('postpilot_posts_v3') || 
@@ -191,6 +198,7 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem(STORAGE_KEY_POSTS, JSON.stringify(healed));
 
       // Nettoie les anciennes clés de localStorage pour libérer le quota
+      localStorage.removeItem('postpilot_posts_v6');
       localStorage.removeItem('postpilot_posts_v5');
       localStorage.removeItem('postpilot_posts_v4');
       localStorage.removeItem('postpilot_posts_v3');
