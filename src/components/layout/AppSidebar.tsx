@@ -30,8 +30,8 @@ export default function AppSidebar() {
   const [copied, setCopied] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  const currentWorkspacePosts = posts.filter(p => p.workspaceId === activeWorkspace.id);
-  const approvedCount = currentWorkspacePosts.filter(p => p.status === 'approved').length;
+  const currentWorkspacePosts = posts.filter(p => p && p.workspaceId === activeWorkspace.id);
+  const approvedCount = currentWorkspacePosts.filter(p => p && (p.status === 'approved' || p.status === 'scheduled')).length;
   const totalPosts = currentWorkspacePosts.length;
   const progressPercent = totalPosts > 0 ? Math.round((approvedCount / totalPosts) * 100) : 0;
 

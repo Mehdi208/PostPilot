@@ -90,9 +90,17 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
             aiPromptSources: (sp.aiPromptSources && sp.aiPromptSources.length > 0) ? sp.aiPromptSources : base.aiPromptSources,
             inspirationUrls: (sp.inspirationUrls && sp.inspirationUrls.length > 0) ? sp.inspirationUrls : base.inspirationUrls,
           });
-        } else {
-          // Nouveaux posts créés manuellement par l'utilisateur
-          map.set(sp.id, sp);
+        } else if (sp && sp.workspaceId) {
+          // Nouveaux posts créés manuellement par l'utilisateur avec valeurs saines
+          map.set(sp.id, {
+            ...sp,
+            platforms: Array.isArray(sp.platforms) ? sp.platforms : ['instagram'],
+            mediaUrls: Array.isArray(sp.mediaUrls) ? sp.mediaUrls : [],
+            scheduledDate: sp.scheduledDate || '2026-10-01',
+            dayOfWeek: sp.dayOfWeek || 'Jeu.',
+            week: sp.week || 'S1',
+            status: sp.status || 'draft',
+          });
         }
       }
     });
@@ -525,16 +533,18 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
 
   // Filtrage des posts selon le workspace, la plateforme, la semaine, le statut et la recherche
   const filteredPosts = posts.filter(post => {
+    if (!post || typeof post !== 'object') return false;
     if (post.workspaceId !== activeWorkspace.id) return false;
     
     if (selectedPlatform !== 'all') {
-      const hasPlatform = post.platforms.some(
-        (plat: Platform) => plat.toLowerCase() === selectedPlatform.toLowerCase()
+      const platforms = Array.isArray(post.platforms) ? post.platforms : [];
+      const hasPlatform = platforms.some(
+        (plat: Platform) => (plat || '').toLowerCase() === selectedPlatform.toLowerCase()
       );
       if (!hasPlatform) return false;
     }
 
-    if (selectedWeek !== 'all' && post.week.toUpperCase() !== selectedWeek.toUpperCase()) {
+    if (selectedWeek !== 'all' && (post.week || '').toUpperCase() !== selectedWeek.toUpperCase()) {
       return false;
     }
 
@@ -544,10 +554,10 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchTheme = post.theme?.toLowerCase().includes(q);
-      const matchCaption = post.caption?.toLowerCase().includes(q);
-      const matchProduct = post.featuredProduct?.toLowerCase().includes(q);
-      const matchCTA = post.cta?.toLowerCase().includes(q);
+      const matchTheme = (post.theme || '').toLowerCase().includes(q);
+      const matchCaption = (post.caption || '').toLowerCase().includes(q);
+      const matchProduct = (post.featuredProduct || '').toLowerCase().includes(q);
+      const matchCTA = (post.cta || '').toLowerCase().includes(q);
       if (!matchTheme && !matchCaption && !matchProduct && !matchCTA) return false;
     }
 

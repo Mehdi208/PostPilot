@@ -36,18 +36,18 @@ export default function AppTopbar() {
 
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const currentWorkspacePosts = posts.filter(p => p.workspaceId === activeWorkspace.id);
-  const approvedCount = currentWorkspacePosts.filter(p => p.status === 'approved').length;
-  const changesCount = currentWorkspacePosts.filter(p => p.status === 'changes_requested').length;
+  const currentWorkspacePosts = posts.filter(p => p && p.workspaceId === activeWorkspace.id);
+  const approvedCount = currentWorkspacePosts.filter(p => p && (p.status === 'approved' || p.status === 'scheduled')).length;
+  const changesCount = currentWorkspacePosts.filter(p => p && p.status === 'changes_requested').length;
   const totalCount = currentWorkspacePosts.length;
   const approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
 
   const handleExportExcel = () => {
     const exportRows = currentWorkspacePosts.map(p => ({
-      'Semaine': p.week,
-      'Date': p.scheduledDate,
-      'Jour': p.dayOfWeek,
-      'Plateforme': p.platforms.join(' / '),
+      'Semaine': p.week || 'S1',
+      'Date': p.scheduledDate || '',
+      'Jour': p.dayOfWeek || '',
+      'Plateforme': Array.isArray(p.platforms) ? p.platforms.join(' / ') : '',
       'Objectif': p.objective,
       'Format': p.format,
       'Thème de publication': p.theme,

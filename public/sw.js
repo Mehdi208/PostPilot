@@ -1,5 +1,5 @@
 // PostPilot PWA Service Worker — Enterprise Offline & Shell Cache
-const CACHE_NAME = 'postpilot-pwa-v5';
+const CACHE_NAME = 'postpilot-pwa-v6';
 const OFFLINE_FALLBACK = '/';
 
 const PRECACHE_ASSETS = [
@@ -14,14 +14,6 @@ const PRECACHE_ASSETS = [
   '/icons/icon-maskable-512.png',
   '/icons/apple-touch-icon.png',
   '/icons/icon.svg',
-  '/posts/mehdi/post-1-presentation.jpg',
-  '/posts/mehdi/post-2-article-ia.jpg',
-  '/posts/mehdi/post-3-carrousel-5p.jpg',
-  '/posts/mehdi/post-4-libre-cafe.jpg',
-  '/posts/inspiration/inspiration-1-personal-branding.jpg',
-  '/posts/inspiration/inspiration-2-ai-tech-editorial.jpg',
-  '/posts/inspiration/inspiration-3-carousel-5p-framework.jpg',
-  '/posts/inspiration/inspiration-4-discipline-lifestyle.jpg',
   '/radar/tapioca-brown-sugar.jpg',
   '/radar/caramel-pour.jpg',
   '/radar/combo-burger.jpg',
@@ -50,13 +42,14 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// 2. Activation & Cleanup of Old Caches
+// 2. Activation & Nettoyage immédiat de tous les anciens caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((name) => {
           if (name !== CACHE_NAME) {
+            console.log('[PostPilot SW] Suppression de l\'ancien cache:', name);
             return caches.delete(name);
           }
         })
@@ -65,17 +58,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// 3. Fetch Strategy
+// 3. Stratégie de requête réseau
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET requests and browser extensions
+  // Ignore les requêtes non-GET et les protocoles spéciaux
   if (request.method !== 'GET' || !url.protocol.startsWith('http')) {
     return;
   }
 
-  // API calls: Network first, never store stale POST/mutation caches
+  // A. Appels API : Toujours réseau direct (Network Only avec réponse JSON hors-ligne si échec)
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request).catch(() => {
@@ -91,7 +84,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // HTML page navigations: Network First with offline fallback to cached shell
+  // B. Chunks & Scripts Next.js (/_next/) : TOUJOURS Réseau en priorité absolue
+  // Évite rigoureusement tout déphasage entre le HTML et les anciens chunks JS en cache
+  if (url.pathname.startsWith('/_next/')) {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cached = await caches.match(request);
+        return cached || Response.error();
+      })
+    );
+    return;
+  }
+
+  // C. Navigation HTML : Réseau en priorité avec fallback shell hors-ligne
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
@@ -114,18 +119,19 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Next.js static assets & icons: Cache First with background refresh
+  // D. Images & icônes statiques : Cache First avec actualisation en tâche de fond
   if (
-    url.pathname.startsWith('/_next/static/') ||
     url.pathname.startsWith('/icons/') ||
     url.pathname.endsWith('.svg') ||
     url.pathname.endsWith('.png') ||
+    url.pathname.endsWith('.jpg') ||
+    url.pathname.endsWith('.jpeg') ||
+    url.pathname.endsWith('.webp') ||
     url.pathname.endsWith('.woff2')
   ) {
     event.respondWith(
       caches.match(request).then((cached) => {
         if (cached) {
-          // Revalidate in background
           fetch(request)
             .then((fresh) => {
               if (fresh && fresh.status === 200) {
@@ -148,7 +154,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default: Stale-While-Revalidate
+  // E. Par défaut : Stale-While-Revalidate
   event.respondWith(
     caches.match(request).then((cached) => {
       const networkFetch = fetch(request)

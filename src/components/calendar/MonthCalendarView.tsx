@@ -79,8 +79,10 @@ export default function MonthCalendarView() {
   });
 
   const displayedMobilePosts = selectedMobileDate
-    ? filteredPosts.filter(p => p.scheduledDate === selectedMobileDate)
-    : [...filteredPosts].filter(p => p.scheduledDate.startsWith(selectedMonth)).sort((a, b) => a.scheduledDate.localeCompare(b.scheduledDate));
+    ? filteredPosts.filter(p => (p.scheduledDate || '') === selectedMobileDate)
+    : [...filteredPosts]
+        .filter(p => (p.scheduledDate || '').startsWith(selectedMonth))
+        .sort((a, b) => (a.scheduledDate || '').localeCompare(b.scheduledDate || ''));
 
   const calendarCells: { dayNumber: number | null; dateStr: string | null }[] = [];
 
@@ -187,7 +189,7 @@ export default function MonthCalendarView() {
                 selectedMonth === '2026-10' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
               }`}
             >
-              Octobre ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-10')).length})
+              Octobre ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-10')).length})
             </button>
             <button
               onClick={() => { setSelectedMonth('2026-11'); setSelectedMobileDate(null); }}
@@ -195,7 +197,7 @@ export default function MonthCalendarView() {
                 selectedMonth === '2026-11' ? 'bg-white dark:bg-zinc-950 text-zinc-950 dark:text-white shadow-xs font-bold' : 'text-zinc-500'
               }`}
             >
-              Novembre ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-11')).length})
+              Novembre ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-11')).length})
             </button>
           </div>
 
@@ -308,7 +310,9 @@ export default function MonthCalendarView() {
                       {/* Top row: Date, time and status */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-1.5 text-xs font-mono font-medium text-zinc-500 dark:text-zinc-400">
-                          <span>{post.dayOfWeek} {post.scheduledDate.split('-')[2]} oct.</span>
+                          <span>
+                            {post.dayOfWeek} {post.scheduledDate ? post.scheduledDate.split('-')[2] : '01'} {post.scheduledDate && post.scheduledDate.includes('-11-') ? 'nov.' : 'oct.'}
+                          </span>
                           {post.time && <span>• {post.time}</span>}
                           <span className="px-1.5 py-0.2 rounded border border-zinc-200 dark:border-zinc-800 text-[10px]">
                             {post.week}
@@ -491,7 +495,7 @@ export default function MonthCalendarView() {
               >
                 Octobre 2026
                 <span className="ml-1 text-[10px] font-mono opacity-70">
-                  ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-10')).length})
+                  ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-10')).length})
                 </span>
               </button>
               <button
@@ -505,7 +509,7 @@ export default function MonthCalendarView() {
               >
                 Novembre 2026
                 <span className="ml-1 text-[10px] font-mono opacity-70">
-                  ({filteredPosts.filter(p => p.scheduledDate.startsWith('2026-11')).length})
+                  ({filteredPosts.filter(p => (p.scheduledDate || '').startsWith('2026-11')).length})
                 </span>
               </button>
             </div>
