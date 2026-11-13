@@ -38,7 +38,7 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v14';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v15';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 // Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
