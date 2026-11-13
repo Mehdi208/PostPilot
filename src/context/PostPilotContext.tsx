@@ -267,16 +267,31 @@ export function PostPilotProvider({ children }: { children: React.ReactNode }) {
           const map = new Map<string, Post>();
           base.forEach(p => map.set(p.id, p));
 
-          // Fusionne les documents Firestore par ID sans effacer les autres posts
+          const initialMap = new Map<string, Post>();
+          getInitialOctoberPosts().forEach(ip => initialMap.set(ip.id, ip));
+
+          // Fusionne les documents Firestore par ID sans écraser les mises à jour officielles Méhdi Traoré
           firestorePosts.forEach(fp => {
             if (fp && fp.id) {
               const prev = map.get(fp.id);
-              map.set(fp.id, {
-                ...(prev || fp),
-                ...fp,
-                workspaceId: fp.workspaceId || activeWorkspace.id,
-                mediaUrls: (fp.mediaUrls && fp.mediaUrls.length > 0) ? fp.mediaUrls : (prev?.mediaUrls || []),
-              });
+              const officialBase = initialMap.get(fp.id);
+              if (officialBase && officialBase.workspaceId === 'mehdi-traore') {
+                map.set(fp.id, {
+                  ...fp,
+                  ...officialBase,
+                  workspaceId: 'mehdi-traore',
+                  mediaUrls: (officialBase.mediaUrls && officialBase.mediaUrls.length > 0)
+                    ? officialBase.mediaUrls
+                    : (fp.mediaUrls && fp.mediaUrls.length > 0 ? fp.mediaUrls : (prev?.mediaUrls || [])),
+                });
+              } else {
+                map.set(fp.id, {
+                  ...(prev || fp),
+                  ...fp,
+                  workspaceId: fp.workspaceId || activeWorkspace.id,
+                  mediaUrls: (fp.mediaUrls && fp.mediaUrls.length > 0) ? fp.mediaUrls : (prev?.mediaUrls || []),
+                });
+              }
             }
           });
 
