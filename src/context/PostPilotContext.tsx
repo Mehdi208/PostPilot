@@ -38,7 +38,7 @@ interface PostPilotContextType {
 
 const PostPilotContext = createContext<PostPilotContextType | undefined>(undefined);
 
-const STORAGE_KEY_POSTS = 'postpilot_posts_v9';
+const STORAGE_KEY_POSTS = 'postpilot_posts_v13';
 const STORAGE_KEY_WORKSPACE = 'postpilot_active_workspace_v1';
 
 // Renvoie les publications officielles de base (16 FruiThé + 4 Méhdi Traoré)
@@ -73,14 +73,14 @@ function mergeWithInitialPosts(savedList: Post[]): Post[] {
           const dayOfWeek = isMehdi ? base.dayOfWeek : (sp.dayOfWeek || base.dayOfWeek);
           const week = isMehdi ? base.week : (sp.week || base.week);
           const time = isMehdi ? (base.time || '08:30') : (sp.time || base.time);
-          const status = (isMehdi && base.id === 'mehdi-post-1-presentation') ? 'published' : (sp.status || base.status);
+          const status = (isMehdi && (base.id === 'mehdi-post-1-presentation' || base.id === 'mehdi-post-2-article')) ? 'published' : (isMehdi ? base.status : (sp.status || base.status));
           const caption = isMehdi ? base.caption : (sp.caption || base.caption);
           const theme = isMehdi ? base.theme : (sp.theme || base.theme);
 
-          // Conserve l'affiche officielle du post 1, et pour les autres posts, conserve les médias importés par l'utilisateur
-          const mergedMedia = (isMehdi && base.id === 'mehdi-post-1-presentation')
-            ? (sp.mediaUrls && sp.mediaUrls.length > 0 ? sp.mediaUrls : base.mediaUrls)
-            : (sp.mediaUrls || []);
+          // Conserve les visuels officiels des posts de Méhdi Traoré ou ceux importés par l'utilisateur
+          const mergedMedia = isMehdi
+            ? (base.mediaUrls && base.mediaUrls.length > 0 ? base.mediaUrls : (sp.mediaUrls || []))
+            : ((sp.mediaUrls && sp.mediaUrls.length > 0) ? sp.mediaUrls : (base.mediaUrls || []));
 
           map.set(sp.id, {
             ...base,
