@@ -453,13 +453,15 @@
     ],
     "objective": "Authenticité & Proximité",
     "format": "image",
-    "theme": "4. Libre & Humain : « 07h15, café et coulisses de l'équilibre »",
-    "caption": "07h15. Le calme avant le rush. ☕💻\n\nSur les réseaux, on montre souvent les réussites : les diplômes, les contrats et les beaux scores.\n\nMais la réalité du quotidien, c'est surtout ça :\nUn café bien chaud, deux onglets de code ouverts, un planning de posts à valider et des to-do lists partout.\n\nJongler entre les cours à l'IFRAN, la gestion du BDE et mes missions pour des entreprises, ça demande une vraie discipline. Il n'y a pas de formule magique : c'est juste être régulier, aimer ce qu'on fait et avancer un pas après l'autre.\n\nPrendre 10 minutes le matin pour faire le point dans le calme, c'est ce qui m'aide à tenir le rythme toute la journée.\n\nForce à tous ceux qui bossent dur sur leurs projets en ce moment !\n\nEt vous, c'est quoi votre habitude indispensable pour bien attaquer la journée ? ☕👇\n\n#VieDeProjet #Coulisses #Discipline #EtudiantEntrepreneur #Abidjan",
+    "theme": "4. Libre & Humain : « 07 h 15, café et coulisses de l'équilibre »",
+    "caption": "07 h 15. Le calme avant l'action. ☕💻\n\nSur LinkedIn, on a souvent tendance à ne montrer que les victoires : les diplômes, les projets livrés, les contrats signés et les événements réussis.\n\nMais la vraie réalité du quotidien ressemble surtout à ça :\nUne tasse de café bien chaude, deux fenêtres de code ouvertes d'un côté, un calendrier éditorial client à valider de l'autre, et une liste de priorités bien remplie.\n\nCes deux dernières années, trouver l'équilibre entre :\n🎓 L'exigence académique de ma Licence en Communication Digitale à l'IFRAN,\n🏛️ La présidence du BDE et l'animation de la vie étudiante,\n🚀 Et la responsabilité de livrer des résultats concrets pour plus de 10 entreprises...\na été l'école la plus intense et la plus formatrice de mon parcours.\n\nOn me demande souvent s'il y a un secret. Il n'y en a pas :\nCe n'est ni du génie ni de la chance. C'est de la régularité, l'envie d'apprendre chaque jour et la discipline d'avancer pas à pas, même quand personne ne regarde.\n\nPrendre 15 minutes au calme chaque matin pour faire le point avant le début de la journée, c'est ce qui me permet de garder le cap.\n\nForce à tous les étudiants, freelances et entrepreneurs qui construisent leurs projets avec passion ! 💪\n\nEt vous, quelle est votre habitude indispensable le matin avant de démarrer une grosse journée ? Partagez-la en commentaire 👇\n\n#Entrepreneuriat #Coulisses #Discipline #CommunicationDigitale #VieEtudiante #IFRAN #Abidjan #MT360",
     "featuredProduct": "Lifestyle & Discipline Entrepreneuriale",
     "cta": "Partagez votre rituel du matin en commentaire",
-    "status": "scheduled",
-    "creativeBrief": "Photo réelle du bureau avec PostPilot sur écran d'ordinateur portable, café fumant et carnet de notes",
-    "mediaUrls": [],
+    "status": "approved",
+    "creativeBrief": "Affiche Master MT 360° (1080×1350 px) — 07 h 15 Le calme avant l'action (Grille Bento 2×2 + Citation discipline + Logo MT 360° transparent)",
+    "mediaUrls": [
+      "/posts/mehdi/post-4-libre-cafe.jpg"
+    ],
     "orderIndex": 20,
     "aiVisualPrompt": "A cinematic, moody lifestyle photograph and typography poster, vertical 4:5 aspect ratio (1080x1350px). Overhead flat-lay view of a minimalist executive workstation at sunrise: a sleek dark ceramic cup of black coffee with rising steam, a high-end matte black notebook with handwritten notes in French and a premium fountain pen, an ultra-thin laptop showing clean code on a dark IDE, and soft natural golden-hour morning sunlight casting long shadows across a dark oak wood desk. Top left discreet typography: '07:15 — LE CALME AVANT LA TEMPÊTE' in elegant monospaced font. Bottom quote: 'La discipline commence quand personne ne regarde'. Film photography aesthetic, Kodak Portra 400 color grading, 35mm lens depth of field, authentic texture, peaceful yet intensely driven morning atmosphere.",
     "aiPromptSources": [
